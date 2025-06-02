@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Home, Calendar, User } from 'lucide-react';
+import { Home, Calendar, User, Plus, Activity, Clock, Zap, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { toast } from '@/hooks/use-toast';
@@ -44,7 +44,7 @@ const Index = () => {
     
     if (newSteps >= dailyGoal && dailySteps < dailyGoal) {
       toast({
-        title: "¡Increíble! 🎉",
+        title: "¡Increíble!",
         description: "¡Has alcanzado tu meta diaria!",
       });
     }
@@ -61,7 +61,7 @@ const Index = () => {
         <h1 className="text-lg font-medium text-gray-300">Lejos Del Sofá</h1>
         <div className="mt-2">
           <span className="text-sm text-gray-400">Misión Del Día: </span>
-          <span className="text-white">Quedan 3000 Pasos</span>
+          <span className="text-white">Quedan {Math.max(0, dailyGoal - dailySteps).toLocaleString()} Pasos</span>
           <div className="w-full bg-gray-700 rounded-full h-1 mt-2 mx-4">
             <div 
               className="bg-purple-500 h-1 rounded-full transition-all duration-500"
@@ -129,31 +129,35 @@ const Index = () => {
           <Button
             onClick={() => handleAddSteps(1000)}
             variant="outline"
-            className="border-purple-500/30 hover:border-purple-400 hover:bg-purple-500/10 h-12 text-sm"
+            className="border-purple-500/30 hover:border-purple-400 hover:bg-purple-500/10 h-14 text-sm flex flex-col items-center gap-1"
           >
-            +1000👟
+            <Target className="w-5 h-5" />
+            +1,000
           </Button>
           <Button
             onClick={() => handleAddSteps(3000)}
             variant="outline"
-            className="border-purple-500/30 hover:border-purple-400 hover:bg-purple-500/10 h-12 text-sm"
+            className="border-purple-500/30 hover:border-purple-400 hover:bg-purple-500/10 h-14 text-sm flex flex-col items-center gap-1"
           >
-            +3000👟
+            <Zap className="w-5 h-5" />
+            +3,000
           </Button>
           <Button
             onClick={() => handleAddSteps(6000)}
             variant="outline"
-            className="border-purple-500/30 hover:border-purple-400 hover:bg-purple-500/10 h-12 text-sm"
+            className="border-purple-500/30 hover:border-purple-400 hover:bg-purple-500/10 h-14 text-sm flex flex-col items-center gap-1"
           >
-            +6000👟
+            <Activity className="w-5 h-5" />
+            +6,000
           </Button>
         </div>
       </div>
 
       {/* Custom Amount Button */}
       <div className="px-4 mb-8">
-        <Button className="w-full gradient-purple hover:opacity-90 h-12 text-lg">
-          ➕ Añadir Cant. Personalizada
+        <Button className="w-full gradient-purple hover:opacity-90 h-12 text-lg flex items-center gap-2">
+          <Plus className="w-5 h-5" />
+          Añadir Cant. Personalizada
         </Button>
       </div>
 
@@ -162,21 +166,24 @@ const Index = () => {
         <CardContent className="p-4">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
-              <div className="text-white text-sm">🏃</div>
+              <Activity className="w-4 h-4 text-white" />
             </div>
             <span className="text-lg">Ejercicios</span>
           </div>
 
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
+            <div className="flex flex-col items-center">
+              <Clock className="w-6 h-6 text-purple-400 mb-1" />
               <div className="text-2xl font-bold">0h 0m</div>
-              <div className="text-sm text-gray-400">Min</div>
+              <div className="text-sm text-gray-400">Tiempo</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold">0,0</div>
+            <div className="flex flex-col items-center">
+              <Zap className="w-6 h-6 text-purple-400 mb-1" />
+              <div className="text-2xl font-bold">0</div>
               <div className="text-sm text-gray-400">Kcal</div>
             </div>
-            <div>
+            <div className="flex flex-col items-center">
+              <Target className="w-6 h-6 text-purple-400 mb-1" />
               <div className="text-2xl font-bold">0,00</div>
               <div className="text-sm text-gray-400">Km</div>
             </div>
@@ -192,7 +199,7 @@ const Index = () => {
             <span className="text-xs text-purple-400 mt-1">Menu</span>
           </Link>
           <Link to="/weekly-progress" className="flex flex-col items-center py-3">
-            <div className="w-6 h-6 text-gray-400">📊</div>
+            <Activity className="w-6 h-6 text-gray-400" />
             <span className="text-xs text-gray-400 mt-1">Actividades</span>
           </Link>
           <Link to="/calendar" className="flex flex-col items-center py-3">

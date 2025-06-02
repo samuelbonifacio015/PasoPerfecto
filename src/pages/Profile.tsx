@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Home, Calendar, User, Settings, ChevronRight } from 'lucide-react';
+import { Home, Calendar, User, Settings, ChevronRight, Target, BarChart3, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Profile = () => {
@@ -35,7 +35,7 @@ const Profile = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 text-purple-400">🎯</div>
+                <Target className="w-6 h-6 text-purple-400" />
                 <span>Mis Objetivos</span>
               </div>
               <ChevronRight className="w-5 h-5 text-gray-400" />
@@ -47,7 +47,7 @@ const Profile = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-6 h-6 text-purple-400">📊</div>
+                <BarChart3 className="w-6 h-6 text-purple-400" />
                 <span>Estadísticas</span>
               </div>
               <ChevronRight className="w-5 h-5 text-gray-400" />
@@ -63,8 +63,8 @@ const Profile = () => {
             <Home className="w-6 h-6 text-gray-400" />
             <span className="text-xs text-gray-400 mt-1">Menu</span>
           </Link>
-          <Link to="/progress" className="flex flex-col items-center py-3">
-            <div className="w-6 h-6 text-gray-400">📊</div>
+          <Link to="/weekly-progress" className="flex flex-col items-center py-3">
+            <Activity className="w-6 h-6 text-gray-400" />
             <span className="text-xs text-gray-400 mt-1">Actividades</span>
           </Link>
           <Link to="/calendar" className="flex flex-col items-center py-3">

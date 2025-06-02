@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, Home, Calendar as CalendarIcon, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, Calendar as CalendarIcon, User, CheckCircle, Plus, Clock, Zap, Target, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Calendar = () => {
@@ -57,7 +57,7 @@ const Calendar = () => {
           {calendarDays.map((week, weekIndex) => (
             <div key={weekIndex} className="grid grid-cols-7 gap-2 mb-2">
               {week.map((day, dayIndex) => {
-                const isToday = day === 14 && weekIndex === 2; // Destacar día 14
+                const isToday = day === 14 && weekIndex === 2;
                 const isPreviousMonth = (weekIndex === 0 && day > 20) || (weekIndex === 5 && day < 7);
                 
                 return (
@@ -87,38 +87,40 @@ const Calendar = () => {
           
           <div className="flex items-center justify-between p-3 bg-purple-500/10 rounded-lg border border-purple-500/20 mb-4">
             <div className="flex items-center space-x-3">
-              <div className="text-2xl">👟</div>
+              <Target className="w-6 h-6 text-purple-400" />
               <span className="text-lg">10.000 Pasos</span>
             </div>
-            <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
+            <CheckCircle className="w-6 h-6 text-green-500" />
           </div>
 
           <div className="flex items-center space-x-3 p-3 bg-gray-800/30 rounded-lg">
             <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
-              <div className="text-white text-sm">🏃</div>
+              <Activity className="w-4 h-4 text-white" />
             </div>
             <span className="text-lg">Ejercicios</span>
           </div>
 
           <div className="grid grid-cols-3 gap-4 mt-4 text-center">
-            <div>
+            <div className="flex flex-col items-center">
+              <Clock className="w-6 h-6 text-purple-400 mb-1" />
               <div className="text-2xl font-bold">1h 35m</div>
-              <div className="text-sm text-gray-400">Min</div>
+              <div className="text-sm text-gray-400">Tiempo</div>
             </div>
-            <div>
+            <div className="flex flex-col items-center">
+              <Zap className="w-6 h-6 text-purple-400 mb-1" />
               <div className="text-2xl font-bold">300</div>
               <div className="text-sm text-gray-400">Kcal</div>
             </div>
-            <div>
+            <div className="flex flex-col items-center">
+              <Target className="w-6 h-6 text-purple-400 mb-1" />
               <div className="text-2xl font-bold">7,58</div>
               <div className="text-sm text-gray-400">Km</div>
             </div>
           </div>
 
-          <Button className="w-full mt-6 gradient-purple hover:opacity-90 h-12">
-            <div className="text-lg">➕ Crear Un Objetivo</div>
+          <Button className="w-full mt-6 gradient-purple hover:opacity-90 h-12 flex items-center gap-2">
+            <Plus className="w-5 h-5" />
+            <span className="text-lg">Crear Un Objetivo</span>
           </Button>
         </CardContent>
       </Card>
@@ -131,7 +133,7 @@ const Calendar = () => {
             <span className="text-xs text-gray-400 mt-1">Menu</span>
           </Link>
           <Link to="/weekly-progress" className="flex flex-col items-center py-3">
-            <div className="w-6 h-6 text-gray-400">📊</div>
+            <Activity className="w-6 h-6 text-gray-400" />
             <span className="text-xs text-gray-400 mt-1">Actividades</span>
           </Link>
           <Link to="/calendar" className="flex flex-col items-center py-3">

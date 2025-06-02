@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Home, Calendar, User, Menu } from 'lucide-react';
+import { Home, Calendar, User, Menu, ChevronLeft, ChevronRight, CheckCircle, Clock, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Progress = () => {
@@ -90,7 +90,7 @@ const Progress = () => {
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center space-x-3 p-3 bg-gray-800/30 rounded-lg">
               <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-                <div className="w-4 h-4 bg-gray-400 rounded-full"></div>
+                <Clock className="w-4 h-4 text-gray-400" />
               </div>
               <div>
                 <div className="text-sm text-gray-400">Pendiente</div>
@@ -100,11 +100,11 @@ const Progress = () => {
 
             <div className="flex items-center space-x-3 p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
               <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                <div className="text-white text-sm">✓</div>
+                <CheckCircle className="w-4 h-4 text-white" />
               </div>
               <div>
                 <div className="text-sm text-gray-400">Completado</div>
-                <div className="text-lg font-semibold text-purple-300">{completedSteps.toLocaleString()}👟</div>
+                <div className="text-lg font-semibold text-purple-300">{completedSteps.toLocaleString()}</div>
               </div>
             </div>
           </div>
@@ -118,11 +118,11 @@ const Progress = () => {
             <h3 className="text-lg font-semibold">Vista De Progreso</h3>
             <div className="flex items-center space-x-2">
               <Button variant="ghost" size="sm" className="text-white">
-                <div className="w-4 h-4">‹</div>
+                <ChevronLeft className="w-4 h-4" />
               </Button>
               <div className="text-sm text-gray-400">14:05:25<br/>25:05:25</div>
               <Button variant="ghost" size="sm" className="text-white">
-                <div className="w-4 h-4">›</div>
+                <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
           </div>
@@ -195,8 +195,8 @@ const Progress = () => {
             <span className="text-xs text-gray-400 mt-1">Menu</span>
           </Link>
           <Link to="/progress" className="flex flex-col items-center py-3">
-            <div className="w-6 h-6 text-gray-400">📊</div>
-            <span className="text-xs text-gray-400 mt-1">Actividades</span>
+            <Activity className="w-6 h-6 text-purple-400" />
+            <span className="text-xs text-purple-400 mt-1">Actividades</span>
           </Link>
           <Link to="/calendar" className="flex flex-col items-center py-3">
             <Calendar className="w-6 h-6 text-gray-400" />
