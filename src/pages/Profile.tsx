@@ -2,27 +2,15 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Home, Calendar, User, Settings, ChevronRight, Target, BarChart3, Activity, Clock, CheckCircle } from 'lucide-react';
+import { Home, Calendar, User, Settings, ChevronRight, Target, BarChart3, Activity, Clock, CheckCircle, Gift, Medal, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useUserData } from '@/hooks/useUserData';
 
 const Profile = () => {
+  const { userData, completeTask } = useUserData();
   const userName = "Samuel";
-  const totalSteps = 6000;
-  const pendingSteps = 4000;
-  const completedSteps = 6000;
   
-  // Datos del gráfico semanal
-  const weeklyData = [
-    { day: 'Dom', steps: 0 },
-    { day: 'Lun', steps: 2000 },
-    { day: 'Mar', steps: 0 },
-    { day: 'Mié', steps: 0 },
-    { day: 'Jue', steps: 6000 },
-    { day: 'Vie', steps: 0 },
-    { day: 'Sáb', steps: 0 }
-  ];
-
-  const maxSteps = Math.max(...weeklyData.map(d => d.steps));
+  const xpPercentage = (userData.xp / userData.maxXp) * 100;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 text-white pb-20">
@@ -34,142 +22,122 @@ const Profile = () => {
           </div>
           <div className="text-left">
             <h1 className="text-xl font-bold">Hola {userName}!</h1>
-            <p className="text-purple-300">Continua Caminando!</p>
+            <p className="text-purple-300">¡Bienvenido A Las Actividades!</p>
           </div>
         </div>
       </div>
 
-      {/* Main Progress Circle */}
-      <div className="flex justify-center mb-8">
-        <div className="relative w-40 h-40">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 160 160">
-            <circle
-              cx="80"
-              cy="80"
-              r="70"
-              fill="none"
-              stroke="rgba(107, 114, 128, 0.3)"
-              strokeWidth="12"
-            />
-            <circle
-              cx="80"
-              cy="80"
-              r="70"
-              fill="none"
-              stroke="url(#gradient)"
-              strokeWidth="12"
-              strokeLinecap="round"
-              strokeDasharray="439.82"
-              strokeDashoffset="175.93"
-              className="transition-all duration-1000 ease-out"
-            />
-            <defs>
-              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#8b5cf6" />
-                <stop offset="100%" stopColor="#c084fc" />
-              </linearGradient>
-            </defs>
-          </svg>
-          
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <div className="text-3xl font-bold text-white">
-              {totalSteps.toLocaleString()}
-            </div>
-            <div className="text-sm text-gray-400">Total Pasos</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="px-4 mb-8">
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center space-x-3 p-4 bg-gray-800/30 rounded-lg">
-            <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
-              <Clock className="w-4 h-4 text-gray-400" />
-            </div>
-            <div>
-              <div className="text-sm text-gray-400">Pendiente</div>
-              <div className="text-lg font-semibold">{pendingSteps.toLocaleString()}</div>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-3 p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
-            <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-              <CheckCircle className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <div className="text-sm text-gray-400">Completado</div>
-              <div className="text-lg font-semibold text-purple-300">{completedSteps.toLocaleString()}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Weekly Progress Chart */}
+      {/* Level Section */}
       <Card className="mx-4 mb-6 glass-effect border-purple-500/20">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold">Vista De Progreso</h3>
-            <div className="text-sm text-gray-400">
-              <div>19:05:25</div>
-              <div>25:05:25</div>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                <Activity className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <div className="text-lg font-bold">Nivel {userData.level}</div>
+              </div>
+            </div>
+            <div className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center">
+              <ChevronRight className="w-5 h-5 text-gray-400" />
             </div>
           </div>
-
-          {/* Chart */}
-          <div className="relative h-32 mb-4">
-            <svg className="w-full h-full" viewBox="0 0 350 128">
-              <defs>
-                <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#8b5cf6" opacity="0.8" />
-                  <stop offset="100%" stopColor="#8b5cf6" opacity="0.1" />
-                </linearGradient>
-              </defs>
-              
-              {/* Chart line */}
-              <path
-                d="M 30 110 L 80 100 L 130 110 L 180 110 L 230 20 L 280 110 L 330 110"
-                fill="none"
-                stroke="#8b5cf6"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+          
+          <div className="mb-2">
+            <div className="flex justify-between text-sm text-gray-400 mb-1">
+              <span>XP Restante: Quedan {userData.maxXp - userData.xp} XP</span>
+              <span>{Math.round(xpPercentage)}%</span>
+            </div>
+            <div className="w-full bg-gray-700 rounded-full h-2">
+              <div 
+                className="bg-gradient-to-r from-orange-400 to-red-500 h-2 rounded-full transition-all duration-500"
+                style={{ width: `${xpPercentage}%` }}
               />
-              
-              {/* Fill area */}
-              <path
-                d="M 30 110 L 80 100 L 130 110 L 180 110 L 230 20 L 280 110 L 330 110 L 330 128 L 30 128 Z"
-                fill="url(#chartGradient)"
-              />
-              
-              {/* Data points */}
-              {weeklyData.map((data, index) => {
-                const x = 30 + index * 50;
-                const y = data.steps === 0 ? 110 : 128 - (data.steps / maxSteps) * 90;
-                
-                return (
-                  <g key={data.day}>
-                    {data.steps > 0 && (
-                      <>
-                        <circle cx={x} cy={y} r="4" fill="#8b5cf6" />
-                        <text x={x} y={y - 15} textAnchor="middle" className="fill-white text-xs">
-                          {(data.steps / 1000).toFixed(0)}.000
-                        </text>
-                        <text x={x} y={y - 5} textAnchor="middle" className="fill-gray-400 text-xs">
-                          Pasos
-                        </text>
-                      </>
-                    )}
-                  </g>
-                );
-              })}
-            </svg>
+            </div>
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Week days */}
-          <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-400">
-            {weeklyData.map((data) => (
-              <div key={data.day}>{data.day}</div>
+      {/* Tasks Section */}
+      <Card className="mx-4 mb-6 glass-effect border-purple-500/20">
+        <CardContent className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Tareas</h3>
+          
+          <div className="space-y-3">
+            {userData.tasks.map((task) => (
+              <div key={task.id} className="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    task.completed ? 'bg-green-500' : 'bg-gray-600'
+                  }`}>
+                    {task.completed ? (
+                      <CheckCircle className="w-4 h-4 text-white" />
+                    ) : (
+                      <Clock className="w-4 h-4 text-gray-400" />
+                    )}
+                  </div>
+                  <span className="text-sm">{task.title}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {task.completed && (
+                    <CheckCircle className="w-5 h-5 text-green-500" />
+                  )}
+                  <div className="w-6 h-6 bg-gray-700 rounded flex items-center justify-center">
+                    <span className="text-xs">📋</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            <Button 
+              variant="ghost" 
+              className="w-full text-purple-400 hover:text-purple-300 flex items-center justify-center gap-2"
+            >
+              See More
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Pasocoins Section */}
+      <Card className="mx-4 mb-6 glass-effect border-purple-500/20">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-lg font-semibold">Saldo Actual:</span>
+            <div className="flex items-center space-x-2">
+              <span className="text-xl font-bold">{userData.pasocoins.toLocaleString()}</span>
+              <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center">
+                <span className="text-xs">💰</span>
+              </div>
+              <span className="text-sm text-gray-400">Pasocoins</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Store Section */}
+      <Card className="mx-4 mb-6 glass-effect border-purple-500/20">
+        <CardContent className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Tienda</h3>
+          
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              { name: 'Insignia Fundador', price: 500, icon: Medal },
+              { name: 'Insignia Fundador', price: 900, icon: Medal },
+              { name: 'Insignia Fundador', price: 950, icon: Medal }
+            ].map((item, index) => (
+              <div key={index} className="text-center">
+                <div className="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-2 relative">
+                  <item.icon className="w-8 h-8 text-white" />
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                    <span className="text-xs text-white">🏆</span>
+                  </div>
+                </div>
+                <div className="text-xs text-gray-400 mb-1">{item.name}</div>
+                <div className="text-xs font-semibold">Precio: {item.price} 💰</div>
+              </div>
             ))}
           </div>
         </CardContent>

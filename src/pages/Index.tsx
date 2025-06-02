@@ -1,191 +1,153 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Home, Calendar, User, Plus, Activity, Clock, Zap, Target } from 'lucide-react';
+import { Home, Calendar, User, Activity, Plus, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { toast } from '@/hooks/use-toast';
+import { useUserData } from '@/hooks/useUserData';
 
 const Index = () => {
-  const [dailySteps, setDailySteps] = useLocalStorage('dailySteps', 6000);
-  const [weeklySteps, setWeeklySteps] = useLocalStorage('weeklySteps', [0, 0, 0, 0, 0, 0, 0]);
-  const [dailyGoal] = useLocalStorage('dailyGoal', 10000);
-  const [lastUpdateDate, setLastUpdateDate] = useLocalStorage('lastUpdateDate', new Date().toDateString());
-
-  const currentDate = new Date().toDateString();
-  const currentDayIndex = new Date().getDay();
-  const mondayIndex = currentDayIndex === 0 ? 6 : currentDayIndex - 1;
-
-  // Reset daily steps if it's a new day
-  useEffect(() => {
-    if (lastUpdateDate !== currentDate) {
-      setDailySteps(0);
-      setLastUpdateDate(currentDate);
-      
-      // Update weekly array with yesterday's steps
-      const newWeeklySteps = [...weeklySteps];
-      const yesterdayIndex = mondayIndex === 0 ? 6 : mondayIndex - 1;
-      newWeeklySteps[yesterdayIndex] = dailySteps;
-      setWeeklySteps(newWeeklySteps);
-    }
-  }, [currentDate, lastUpdateDate]);
-
-  // Update today's steps in weekly array whenever dailySteps changes
-  useEffect(() => {
-    const newWeeklySteps = [...weeklySteps];
-    newWeeklySteps[mondayIndex] = dailySteps;
-    setWeeklySteps(newWeeklySteps);
-  }, [dailySteps, mondayIndex]);
-
-  const handleAddSteps = (steps: number) => {
-    const newSteps = dailySteps + steps;
-    setDailySteps(newSteps);
-    
-    if (newSteps >= dailyGoal && dailySteps < dailyGoal) {
-      toast({
-        title: "¡Increíble!",
-        description: "¡Has alcanzado tu meta diaria!",
-      });
-    }
-  };
-
-  const percentage = Math.min((dailySteps / dailyGoal) * 100, 100);
-  const circumference = 2 * Math.PI * 90;
+  const { userData, updateSteps } = useUserData();
+  const today = new Date().toISOString().split('T')[0];
+  
+  const percentage = Math.min((userData.steps / userData.dailyGoal) * 100, 100);
+  const circumference = 2 * Math.PI * 120;
+  const strokeDasharray = circumference;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
+  const addSteps = (steps: number) => {
+    const newSteps = userData.steps + steps;
+    updateSteps(newSteps, today);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 text-white pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 text-white">
       {/* Header */}
-      <div className="text-center pt-12 pb-6">
-        <h1 className="text-lg font-medium text-gray-300">Lejos Del Sofá</h1>
-        <div className="mt-2">
-          <span className="text-sm text-gray-400">Misión Del Día: </span>
-          <span className="text-white">Quedan {Math.max(0, dailyGoal - dailySteps).toLocaleString()} Pasos</span>
-          <div className="w-full bg-gray-700 rounded-full h-1 mt-2 mx-4">
-            <div 
-              className="bg-purple-500 h-1 rounded-full transition-all duration-500"
-              style={{ width: `${percentage}%` }}
-            />
+      <div className="text-center pt-12 pb-8">
+        <div className="flex items-center justify-center space-x-3 mb-6">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+            <span className="text-white font-bold">S</span>
           </div>
-          <span className="text-sm text-gray-400">{Math.round(percentage)}%</span>
+          <div className="text-left">
+            <h1 className="text-xl font-bold">Hola Samuel!</h1>
+            <p className="text-purple-300">Continua Caminando!</p>
+          </div>
         </div>
       </div>
 
-      {/* Circular Progress */}
+      {/* Main Progress Circle */}
       <div className="flex justify-center mb-8">
         <div className="relative w-64 h-64">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 200 200">
-            {/* Background Circle */}
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 256 256">
             <circle
-              cx="100"
-              cy="100"
-              r="90"
+              cx="128"
+              cy="128"
+              r="120"
               fill="none"
-              stroke="rgba(107, 114, 128, 0.3)"
+              stroke="rgba(107, 114, 128, 0.2)"
               strokeWidth="12"
             />
-            {/* Progress Circle */}
             <circle
-              cx="100"
-              cy="100"
-              r="90"
+              cx="128"
+              cy="128"
+              r="120"
               fill="none"
               stroke="url(#gradient)"
               strokeWidth="12"
               strokeLinecap="round"
-              strokeDasharray={circumference}
+              strokeDasharray={strokeDasharray}
               strokeDashoffset={strokeDashoffset}
               className="transition-all duration-1000 ease-out"
             />
-            {/* Gradient Definition */}
             <defs>
               <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="#8b5cf6" />
+                <stop offset="50%" stopColor="#a855f7" />
                 <stop offset="100%" stopColor="#c084fc" />
               </linearGradient>
             </defs>
           </svg>
           
-          {/* Center Content */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <div className="text-4xl font-bold text-white mb-1">
-              {dailySteps.toLocaleString()}
+            <div className="text-4xl font-bold text-purple-400 mb-2 glow-purple">
+              {userData.steps.toLocaleString()}
             </div>
-            <div className="text-sm text-gray-400 mb-1">Pasos</div>
-            <div className="text-lg font-semibold text-purple-300">
+            <div className="text-sm text-gray-400 mb-1">pasos</div>
+            <div className="text-xs text-purple-300">
+              Meta: {userData.dailyGoal.toLocaleString()}
+            </div>
+            <div className="text-lg font-semibold text-purple-300 mt-2">
               {Math.round(percentage)}%
             </div>
-            <div className="text-xs text-gray-500 mt-2">
-              Meta Establecida: {dailyGoal.toLocaleString()} Pasos
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Quick Add Buttons */}
+      {/* Quick Step Buttons */}
       <div className="px-4 mb-8">
-        <div className="grid grid-cols-3 gap-3">
-          <Button
-            onClick={() => handleAddSteps(1000)}
-            variant="outline"
-            className="border-purple-500/30 hover:border-purple-400 hover:bg-purple-500/10 h-14 text-sm flex flex-col items-center gap-1"
+        <div className="grid grid-cols-2 gap-4">
+          <Button 
+            onClick={() => addSteps(500)}
+            className="h-16 gradient-purple hover:opacity-90 text-lg font-semibold"
           >
-            <Target className="w-5 h-5" />
-            +1,000
+            +500 Pasos
           </Button>
-          <Button
-            onClick={() => handleAddSteps(3000)}
-            variant="outline"
-            className="border-purple-500/30 hover:border-purple-400 hover:bg-purple-500/10 h-14 text-sm flex flex-col items-center gap-1"
+          <Button 
+            onClick={() => addSteps(1000)}
+            className="h-16 gradient-purple hover:opacity-90 text-lg font-semibold"
           >
-            <Zap className="w-5 h-5" />
-            +3,000
+            +1000 Pasos
           </Button>
-          <Button
-            onClick={() => handleAddSteps(6000)}
-            variant="outline"
-            className="border-purple-500/30 hover:border-purple-400 hover:bg-purple-500/10 h-14 text-sm flex flex-col items-center gap-1"
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <Button 
+            onClick={() => addSteps(1500)}
+            className="h-16 gradient-purple hover:opacity-90 text-lg font-semibold"
           >
-            <Activity className="w-5 h-5" />
-            +6,000
+            +1500 Pasos
+          </Button>
+          <Button 
+            onClick={() => addSteps(2000)}
+            className="h-16 gradient-purple hover:opacity-90 text-lg font-semibold"
+          >
+            +2000 Pasos
           </Button>
         </div>
       </div>
 
-      {/* Custom Amount Button */}
-      <div className="px-4 mb-8">
-        <Button className="w-full gradient-purple hover:opacity-90 h-12 text-lg flex items-center gap-2">
-          <Plus className="w-5 h-5" />
-          Añadir Cant. Personalizada
-        </Button>
-      </div>
+      {/* Achievement Messages */}
+      {percentage >= 100 && (
+        <Card className="mx-4 mb-6 glass-effect border-green-500/20 bg-green-500/10">
+          <CardContent className="p-4 text-center">
+            <Target className="w-8 h-8 text-green-400 mx-auto mb-2" />
+            <div className="text-green-300 font-semibold">¡Meta alcanzada!</div>
+            <div className="text-sm text-green-400">¡Excelente trabajo hoy!</div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {percentage >= 75 && percentage < 100 && (
+        <Card className="mx-4 mb-6 glass-effect border-yellow-500/20 bg-yellow-500/10">
+          <CardContent className="p-4 text-center">
+            <Activity className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
+            <div className="text-yellow-300 font-semibold">¡Casi lo logras!</div>
+            <div className="text-sm text-yellow-400">Te faltan {userData.dailyGoal - userData.steps} pasos</div>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Exercise Section */}
-      <Card className="mx-4 glass-effect border-purple-500/20">
+      {/* Stats Card */}
+      <Card className="mx-4 mb-6 glass-effect border-purple-500/20">
         <CardContent className="p-4">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
-              <Activity className="w-4 h-4 text-white" />
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold text-purple-400">{userData.level}</div>
+              <div className="text-sm text-gray-400">Nivel</div>
             </div>
-            <span className="text-lg">Ejercicios</span>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="flex flex-col items-center">
-              <Clock className="w-6 h-6 text-purple-400 mb-1" />
-              <div className="text-2xl font-bold">0h 0m</div>
-              <div className="text-sm text-gray-400">Tiempo</div>
-            </div>
-            <div className="flex flex-col items-center">
-              <Zap className="w-6 h-6 text-purple-400 mb-1" />
-              <div className="text-2xl font-bold">0</div>
-              <div className="text-sm text-gray-400">Kcal</div>
-            </div>
-            <div className="flex flex-col items-center">
-              <Target className="w-6 h-6 text-purple-400 mb-1" />
-              <div className="text-2xl font-bold">0,00</div>
-              <div className="text-sm text-gray-400">Km</div>
+            <div>
+              <div className="text-2xl font-bold text-purple-400">{userData.pasocoins}</div>
+              <div className="text-sm text-gray-400">Pasocoins</div>
             </div>
           </div>
         </CardContent>

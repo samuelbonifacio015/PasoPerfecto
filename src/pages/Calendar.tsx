@@ -1,11 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Home, Calendar as CalendarIcon, User, CheckCircle, Plus, Clock, Zap, Target, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useUserData } from '@/hooks/useUserData';
 
 const Calendar = () => {
+  const { userData, updateSteps } = useUserData();
+  const [selectedDate, setSelectedDate] = useState('2025-12-14');
   const currentDate = new Date();
   const currentMonth = 'December';
   const currentYear = 2025;
@@ -20,6 +23,9 @@ const Calendar = () => {
     [25, 26, 27, 28, 29, 30, 31],
     [1, 2, 3, 4, 5, 6, 7]
   ];
+
+  const selectedDayData = userData.dailyData[selectedDate] || { steps: 0, tasks: [], xpEarned: 0 };
+  const isGoalCompleted = selectedDayData.steps >= userData.dailyGoal;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 text-white">
@@ -59,19 +65,27 @@ const Calendar = () => {
               {week.map((day, dayIndex) => {
                 const isToday = day === 14 && weekIndex === 2;
                 const isPreviousMonth = (weekIndex === 0 && day > 20) || (weekIndex === 5 && day < 7);
+                const dateKey = `2025-12-${day.toString().padStart(2, '0')}`;
+                const hasData = userData.dailyData[dateKey]?.steps > 0;
                 
                 return (
                   <div
                     key={dayIndex}
-                    className={`text-center py-3 rounded-lg transition-all ${
+                    onClick={() => !isPreviousMonth && setSelectedDate(dateKey)}
+                    className={`text-center py-3 rounded-lg transition-all cursor-pointer relative ${
                       isToday 
                         ? 'bg-purple-500 text-white font-bold' 
                         : isPreviousMonth 
                         ? 'text-gray-600' 
+                        : selectedDate === dateKey
+                        ? 'bg-purple-500/50 text-white'
                         : 'text-white hover:bg-purple-500/20'
                     }`}
                   >
                     {day}
+                    {hasData && !isPreviousMonth && (
+                      <div className="absolute top-1 right-1 w-2 h-2 bg-green-400 rounded-full"></div>
+                    )}
                   </div>
                 );
               })}
@@ -83,21 +97,29 @@ const Calendar = () => {
       {/* Daily Summary */}
       <Card className="mx-4 mt-6 glass-effect border-purple-500/20">
         <CardContent className="p-4">
-          <h3 className="text-lg font-semibold mb-4">Resumen Del Día</h3>
+          <h3 className="text-lg font-semibold mb-4">Resumen Del Día - {selectedDate}</h3>
           
-          <div className="flex items-center justify-between p-3 bg-purple-500/10 rounded-lg border border-purple-500/20 mb-4">
+          <div className={`flex items-center justify-between p-3 rounded-lg border mb-4 ${
+            isGoalCompleted 
+              ? 'bg-green-500/10 border-green-500/20' 
+              : 'bg-purple-500/10 border-purple-500/20'
+          }`}>
             <div className="flex items-center space-x-3">
               <Target className="w-6 h-6 text-purple-400" />
-              <span className="text-lg">10.000 Pasos</span>
+              <span className="text-lg">{userData.dailyGoal.toLocaleString()} Pasos</span>
             </div>
-            <CheckCircle className="w-6 h-6 text-green-500" />
+            {isGoalCompleted ? (
+              <CheckCircle className="w-6 h-6 text-green-500" />
+            ) : (
+              <Clock className="w-6 h-6 text-gray-400" />
+            )}
           </div>
 
-          <div className="flex items-center space-x-3 p-3 bg-gray-800/30 rounded-lg">
+          <div className="flex items-center space-x-3 p-3 bg-gray-800/30 rounded-lg mb-4">
             <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
               <Activity className="w-4 h-4 text-white" />
             </div>
-            <span className="text-lg">Ejercicios</span>
+            <span className="text-lg">Pasos: {selectedDayData.steps.toLocaleString()}</span>
           </div>
 
           <div className="grid grid-cols-3 gap-4 mt-4 text-center">
@@ -133,8 +155,8 @@ const Calendar = () => {
             <span className="text-xs text-gray-400 mt-1">Menu</span>
           </Link>
           <Link to="/weekly-progress" className="flex flex-col items-center py-3">
-            <Activity className="w-6 h-6 text-gray-400" />
-            <span className="text-xs text-gray-400 mt-1">Actividades</span>
+            <Activity className="w-6 h-6 text-purple-400" />
+            <span className="text-xs text-purple-400 mt-1">Actividades</span>
           </Link>
           <Link to="/calendar" className="flex flex-col items-center py-3">
             <CalendarIcon className="w-6 h-6 text-purple-400" />
