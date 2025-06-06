@@ -21,7 +21,10 @@ const Profile = () => {
 
   const totalWeeklySteps = weeklyData.reduce((sum, day) => sum + day.steps, 0);
   const progressPercentage = Math.min((userData.steps / userData.dailyGoal) * 100, 100);
-  const unlockedAchievements = userData.achievements.filter(a => a.unlocked);
+  
+  // Safety check for achievements
+  const achievements = userData.achievements || [];
+  const unlockedAchievements = achievements.filter(a => a.unlocked);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 text-white font-satoshi">
