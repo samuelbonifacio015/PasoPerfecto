@@ -16,15 +16,24 @@ const Profile = () => {
     { day: 'Jue', steps: 6400 },
     { day: 'Vie', steps: 11200 },
     { day: 'Sab', steps: 8900 },
-    { day: 'Dom', steps: userData.steps }
+    { day: 'Dom', steps: userData?.steps || 0 }
   ];
 
   const totalWeeklySteps = weeklyData.reduce((sum, day) => sum + day.steps, 0);
-  const progressPercentage = Math.min((userData.steps / userData.dailyGoal) * 100, 100);
+  const progressPercentage = Math.min(((userData?.steps || 0) / (userData?.dailyGoal || 10000)) * 100, 100);
   
   // Safety check for achievements
-  const achievements = userData.achievements || [];
+  const achievements = userData?.achievements || [];
   const unlockedAchievements = achievements.filter(a => a.unlocked);
+
+  // Safety checks for numeric values
+  const safeSteps = userData?.steps || 0;
+  const safeTotalSteps = userData?.totalSteps || 0;
+  const safeLevel = userData?.level || 1;
+  const safeXp = userData?.xp || 0;
+  const safeMaxXp = userData?.maxXp || 1000;
+  const safeStreak = userData?.streak || 0;
+  const safeTasks = userData?.tasks || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 text-white font-satoshi">
@@ -70,7 +79,7 @@ const Profile = () => {
           
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <div className="text-3xl font-bold text-white mb-1">
-              {userData.steps.toLocaleString()}
+              {safeSteps.toLocaleString()}
             </div>
             <div className="text-sm text-primary-200">pasos hoy</div>
           </div>
@@ -90,10 +99,10 @@ const Profile = () => {
             <CardContent className="p-4">
               <div className="text-lg text-primary-200 mb-1">Objetivos</div>
               <div className="flex justify-between text-sm">
-                <span className="text-green-400">✓ Completados: {userData.tasks.filter(t => t.completed).length}</span>
+                <span className="text-green-400">✓ Completados: {safeTasks.filter(t => t.completed).length}</span>
               </div>
               <div className="flex justify-between text-sm mt-1">
-                <span className="text-yellow-400">⏳ Pendientes: {userData.tasks.filter(t => !t.completed).length}</span>
+                <span className="text-yellow-400">⏳ Pendientes: {safeTasks.filter(t => !t.completed).length}</span>
               </div>
             </CardContent>
           </Card>
@@ -108,8 +117,8 @@ const Profile = () => {
               <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center mx-auto mb-2">
                 <Activity className="w-6 h-6 text-white" />
               </div>
-              <div className="text-2xl font-bold text-white">Nivel {userData.level}</div>
-              <div className="text-sm text-primary-200">XP: {userData.xp}/{userData.maxXp}</div>
+              <div className="text-2xl font-bold text-white">Nivel {safeLevel}</div>
+              <div className="text-sm text-primary-200">XP: {safeXp}/{safeMaxXp}</div>
             </CardContent>
           </Card>
           <Card className="glass-card border-primary-500/20">
@@ -132,12 +141,12 @@ const Profile = () => {
               <div className="flex items-center space-x-3">
                 <div className="text-3xl">🔥</div>
                 <div>
-                  <div className="text-xl font-bold text-white">{userData.streak} días</div>
+                  <div className="text-xl font-bold text-white">{safeStreak} días</div>
                   <div className="text-sm text-primary-200">Racha actual</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-xl font-bold text-white">{userData.totalSteps.toLocaleString()}</div>
+                <div className="text-xl font-bold text-white">{safeTotalSteps.toLocaleString()}</div>
                 <div className="text-sm text-primary-200">Pasos totales</div>
               </div>
             </div>
