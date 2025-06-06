@@ -22,12 +22,11 @@ const Profile = () => {
   const totalWeeklySteps = weeklyData.reduce((sum, day) => sum + day.steps, 0);
   const progressPercentage = Math.min(((userData?.steps || 0) / (userData?.dailyGoal || 10000)) * 100, 100);
   
-  // Safety check for achievements
+  // Check de Logros
   const achievements = userData?.achievements || [];
   const unlockedAchievements = achievements.filter(a => a.unlocked);
 
-  // Safety checks for numeric values
-  const safeSteps = userData?.steps || 0;
+   // Comprobación de seguridad para valores numéricos const safeSteps = userData?.steps || 0;
   const safeTotalSteps = userData?.totalSteps || 0;
   const safeLevel = userData?.level || 1;
   const safeXp = userData?.xp || 0;
@@ -43,7 +42,7 @@ const Profile = () => {
         <p className="text-primary-200">Tu progreso semanal</p>
       </div>
 
-      {/* Main Progress Circle */}
+      {/* Circulo Main */}
       <div className="flex justify-center mb-8 animate-fade-in-up">
         <div className="relative">
           <svg className="transform -rotate-90" width="200" height="200">
@@ -109,7 +108,7 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Level and Achievements */}
+      {/* Niveles y Logros */}
       <div className="px-4 mb-6 animate-fade-in-up">
         <div className="grid grid-cols-2 gap-4">
           <Card className="glass-card border-primary-500/20">
@@ -133,7 +132,7 @@ const Profile = () => {
         </div>
       </div>
 
-      {/* Streak and Goals */}
+      {/* Metas y Rachas */}
       <div className="px-4 mb-6 animate-fade-in-up">
         <Card className="glass-card border-primary-500/20">
           <CardContent className="p-4">
@@ -154,7 +153,7 @@ const Profile = () => {
         </Card>
       </div>
 
-      {/* Recent Achievements */}
+      {/* Logros Recientes */}
       <Card className="mx-4 mb-6 glass-card border-primary-500/20 animate-fade-in-up">
         <CardContent className="p-4">
           <div className="flex items-center gap-2 mb-4">

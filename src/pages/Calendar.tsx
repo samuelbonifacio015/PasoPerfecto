@@ -11,7 +11,7 @@ const Calendar = () => {
   const { userData, updateSteps } = useUserData();
   const { getProgressForDate } = useDailyProgress();
   const [selectedDate, setSelectedDate] = useState('2025-06-06');
-  const [currentMonth, setCurrentMonth] = useState(5); // June (0-indexed)
+  const [currentMonth, setCurrentMonth] = useState(5); 
   const [currentYear, setCurrentYear] = useState(2025);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [planType, setPlanType] = useState<'weekly' | 'monthly'>('weekly');
@@ -115,10 +115,10 @@ const Calendar = () => {
         </div>
       </div>
 
-      {/* Calendar */}
+      {/* Calendario */}
       <Card className="mx-4 mt-4 glass-card border-primary-500/20 animate-fade-in-up">
         <CardContent className="p-4">
-          {/* Days of week header */}
+          {/* Dias de la semana header */}
           <div className="grid grid-cols-7 gap-2 mb-4">
             {daysOfWeek.map((day) => (
               <div key={day} className="text-center text-primary-200 font-medium py-2">
@@ -127,7 +127,7 @@ const Calendar = () => {
             ))}
           </div>
           
-          {/* Calendar days */}
+          {/* Dias de Calendario */}
           {weeks.map((week, weekIndex) => (
             <div key={weekIndex} className="grid grid-cols-7 gap-2 mb-2">
               {week.map((dayInfo, dayIndex) => {
@@ -163,7 +163,7 @@ const Calendar = () => {
         </CardContent>
       </Card>
 
-      {/* Plan Creation Buttons */}
+      {/* Botones de Creacion de Plan Semanal & Mensual */}
       <div className="mx-4 mt-4 grid grid-cols-2 gap-4 animate-fade-in-up">
         <Button 
           onClick={() => {setPlanType('weekly'); setShowPlanModal(true);}}
@@ -181,12 +181,12 @@ const Calendar = () => {
         </Button>
       </div>
 
-      {/* Daily Summary */}
+      {/* Resumen Diario */}
       <Card className="mx-4 mt-6 glass-card border-primary-500/20 animate-fade-in-up">
         <CardContent className="p-4">
           <h3 className="text-lg font-semibold mb-4 text-white">Resumen Del Día ({selectedDate})</h3>
           
-          {/* Step Goal Status */}
+          {/* Status Meta Pasos */}
           <div className={`flex items-center justify-between p-4 rounded-lg border mb-4 transition-all duration-200 ${
             isGoalCompleted 
               ? 'bg-green-500/20 border-green-500/40' 
@@ -203,7 +203,7 @@ const Calendar = () => {
             )}
           </div>
 
-          {/* Current Steps */}
+          {/* Pasos Actuales */}
           <div className="flex items-center space-x-3 p-4 bg-primary-700/40 rounded-lg mb-4 border border-primary-500/30">
             <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
               <Activity className="w-4 h-4 text-white" />
@@ -211,7 +211,7 @@ const Calendar = () => {
             <span className="text-lg text-white font-medium">Pasos: {selectedDayData.steps.toLocaleString()}</span>
           </div>
 
-          {/* Exercise Stats */}
+          {/* Ejercicio */}
           <div className="grid grid-cols-3 gap-4 mt-4 text-center">
             <div className="flex flex-col items-center p-3 bg-primary-700/30 rounded-lg transition-all duration-200 hover:bg-primary-700/40">
               <Clock className="w-6 h-6 text-primary-300 mb-2" />
@@ -232,7 +232,7 @@ const Calendar = () => {
         </CardContent>
       </Card>
 
-      {/* Plan Modal Placeholder */}
+      {/* Plan Modal */}
       {showPlanModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-md glass-card border-primary-500/20">
@@ -263,7 +263,7 @@ const Calendar = () => {
         </div>
       )}
 
-      {/* Bottom Navigation */}
+      {/* Navegación inferior */}
       <div className="fixed bottom-0 left-0 right-0 bg-primary-800/95 backdrop-blur-md border-t border-primary-500/20">
         <div className="grid grid-cols-4 py-2">
           <Link to="/" className="flex flex-col items-center py-3 transition-all duration-200 hover:bg-primary-700/30">

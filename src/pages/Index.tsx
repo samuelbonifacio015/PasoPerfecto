@@ -31,7 +31,7 @@ const Index = () => {
     "¡Eres imparable!"
   ];
 
-  // Get current day's data
+  // Obtiene la data del día actual o calcula valores predeterminados
   const currentTime = userData.dailyData[currentDate]?.time || `${Math.floor(userData.steps / 120)}h ${Math.floor((userData.steps % 120) / 2)}m`;
   const currentCalories = userData.dailyData[currentDate]?.calories || Math.round(userData.steps * 0.04);
   const currentDistance = userData.dailyData[currentDate]?.distance || +(userData.steps * 0.0008).toFixed(2);
@@ -40,7 +40,7 @@ const Index = () => {
     const newSteps = userData.steps + steps;
     updateSteps(newSteps, currentDate);
     
-    // Show motivational message
+    // Muestra mensaje aleatorio motivacional
     const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
     setMotivationalMessage(randomMessage);
     setTimeout(() => setMotivationalMessage(''), 3000);
@@ -92,12 +92,12 @@ const Index = () => {
         )}
       </div>
 
-      {/* Daily Mission Widget */}
+      {/* Widget Mision Diaria */}
       <div className="px-4 mb-6">
         <DailyMissionWidget currentSteps={userData.steps} />
       </div>
 
-      {/* Progress Circle */}
+      {/* Progreso */}
       <div className="flex justify-center mb-8 animate-fade-in-up">
         <div className="relative">
           <svg className="transform -rotate-90" width="280" height="280">
@@ -150,7 +150,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Quick Action Buttons */}
+      {/* Buttons Acciones */}
       <div className="px-4 mb-6 animate-fade-in-up">
         <div className="grid grid-cols-3 gap-3 mb-4">
           <Button 
@@ -199,7 +199,7 @@ const Index = () => {
           </div>
         )}
 
-        {/* Save Progress Button */}
+        {/* Guardar Progreso */}
         <Button 
           onClick={handleSaveProgress}
           className="w-full mt-4 bg-green-600 hover:bg-green-700 h-12 flex items-center gap-2 text-lg font-semibold border border-green-500/30 shadow-lg button-hover"
@@ -208,7 +208,7 @@ const Index = () => {
           <span>Guardar Progreso del Día</span>
         </Button>
 
-        {/* Reset and Undo Buttons */}
+        {/* Reset */}
         <div className="grid grid-cols-2 gap-3 mt-4">
           <Button 
             onClick={handleResetSteps}
@@ -230,7 +230,7 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Stats Cards with Exercise Grid */}
+      {/* Stats Grid */}
       <div className="px-4 mb-6 animate-fade-in-up">
         <div className="grid grid-cols-3 gap-4 text-center mb-4">
           <EditableStatCard
@@ -250,7 +250,7 @@ const Index = () => {
           />
         </div>
 
-        {/* Exercise Grid */}
+        {/* Grid Ejercicio*/}
         <Card className="glass-card border-primary-500/20">
           <CardContent className="p-4">
             <ExerciseGrid 
@@ -262,7 +262,7 @@ const Index = () => {
         </Card>
       </div>
 
-      {/* Goal Status */}
+      {/* Estado de Meta */}
       {isGoalCompleted && (
         <div className="mx-4 mb-6 animate-fade-in-up">
           <Card className="bg-green-500/20 border-green-500/40">
@@ -276,7 +276,7 @@ const Index = () => {
         </div>
       )}
 
-      {/* Streak Display */}
+      {/* Display de Racha */}
       <div className="mx-4 mb-20 animate-fade-in-up">
         <Card className="glass-card border-primary-500/20">
           <CardContent className="p-4">
@@ -288,7 +288,7 @@ const Index = () => {
         </Card>
       </div>
 
-      {/* Bottom Navigation */}
+      {/* Navegacion Inferior */}
       <div className="fixed bottom-0 left-0 right-0 bg-primary-800/95 backdrop-blur-md border-t border-primary-500/20">
         <div className="grid grid-cols-4 py-2">
           <Link to="/" className="flex flex-col items-center py-3 transition-all duration-200 hover:bg-primary-700/30">
