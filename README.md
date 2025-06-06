@@ -3,8 +3,14 @@
 </p> -->
 # PasoPerfecto
 
+<p align="center">
+  <img src="https://img.shields.io/badge/v1.0.0-blue" alt="v1.0.0" />
+</p>
+
 <p align = "center"><i> PasoPerfecto es una aplicación web diseñada para ayudarte a llevar un seguimiento eficiente de tus pasos y actividad física diaria.
 </i></p>
+
+<img src="https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/baner.png" style="border-radius: 16px;" />
 
 ## [https://paso-perfecto.vercel.app](https://paso-perfecto.vercel.app)
 
@@ -25,33 +31,78 @@
   </li>
 </ul>
 
-## Características
+## ⚡ Características
 
-- Registro de pasos diarios
-- Visualización de estadísticas y gráficos
-- Objetivos personalizados
-- Interfaz intuitiva y responsiva
+- **Registro automático y manual de pasos:** Permite ingresar los pasos diarios de forma manual o sincronizar con dispositivos compatibles para un seguimiento automático.
+- **Visualización de estadísticas avanzadas:** Muestra gráficos interactivos y resúmenes diarios, semanales y mensuales para analizar tu progreso.
+- **Establecimiento y seguimiento de objetivos personalizados:** Define metas diarias, semanales o mensuales de pasos y recibe notificaciones cuando las alcanzas.
+- **Historial detallado de actividad:** Consulta el historial completo de tus pasos y actividades físicas, con filtros por fecha y tipo de actividad.
+- **Integración con calendario:** Visualiza tus actividades y logros en un calendario integrado para identificar patrones y mantener la motivación.
+- **Interfaz intuitiva y responsiva:** Diseño moderno y adaptable a cualquier dispositivo, facilitando la navegación tanto en móviles como en escritorio.
+- **Soporte para múltiples usuarios:** Permite gestionar varias cuentas o perfiles, ideal para familias o grupos.
+- **Notificaciones y recordatorios:** Recibe alertas para mantenerte activo y cumplir tus objetivos diarios.
+- **Protección de datos y privacidad:** Tus datos están seguros y solo tú tienes acceso a tu información personal.
+- **Modo oscuro:** Opción para cambiar la apariencia de la aplicación y reducir la fatiga visual.
 
-## Instalación
 
-1. Clona el repositorio:
+## 📸 Screenshots
+
+#### Actividades
+![Actividades](https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/activities.png)
+
+#### Calendario
+![Calendario](https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/calendar.png)
+
+#### Home
+![Home](https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/home.png)
+
+## Instalación local
+
+Sigue estos pasos para ejecutar PasoPerfecto en tu entorno local:
+
+1. **Clona el repositorio:**
   ```bash
-  git clone https://github.com/tu-usuario/paso-perfecto.git
+  git clone https://github.com/samuelbonifacio015/PasoPerfecto.git
+  cd PasoPerfecto
   ```
-2. Instala las dependencias:
+
+2. **Instala las dependencias:**
   ```bash
   npm install
   ```
-3. Inicia la aplicación:
+
+3. **Inicia la aplicación:**
   ```bash
-  npm start
+  npm run dev
   ```
 
-## Uso
+4. Abre tu navegador y visita [http://localhost:5173](http://localhost:5173) para ver la aplicación en funcionamiento.
 
-Accede a la aplicación en `http://localhost:3000` y comienza a registrar tus pasos.
+> Asegúrate de tener [Node.js](https://nodejs.org/) instalado en tu sistema.
 
-## Contribución
+## 🚀 Release
+
+### <img src="https://img.shields.io/badge/v1.0.0-blue" alt="v1.0.0" height="20" /> Versión 1.0.0
+
+> **Fecha de lanzamiento:** 6/06/25
+
+#### ✨ Novedades principales
+
+- 🏃‍♂️ **Registro de pasos:** Manual y automático.
+- 📊 **Estadísticas avanzadas:** Gráficos y resúmenes diarios, semanales y mensuales.
+- 🎯 **Objetivos personalizados:** Establecimiento y seguimiento de metas.
+- 📅 **Historial y calendario:** Consulta de actividades y logros.
+- 👥 **Soporte multiusuario:** Gestión de varias cuentas.
+- 🔔 **Notificaciones:** Recordatorios y alertas.
+- 🌙 **Modo oscuro:** Interfaz adaptable.
+- 🛡️ **Privacidad:** Protección de datos personales.
+- 💻 **Interfaz moderna y responsiva.**
+
+---
+
+Consulta el [changelog completo](https://github.com/samuelbonifacio015/PasoPerfecto/releases) para más detalles y futuras actualizaciones.
+
+## 👋 Contribución
 
 ¡Las contribuciones son bienvenidas! Por favor, abre un issue o pull request para sugerencias o mejoras.
 
