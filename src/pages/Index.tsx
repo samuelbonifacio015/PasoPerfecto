@@ -2,12 +2,16 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Home, Calendar as CalendarIcon, User, Target, Plus, Activity } from 'lucide-react';
+import { Home, Calendar as CalendarIcon, User, Target, Plus, Activity, RotateCcw, Undo } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserData } from '@/hooks/useUserData';
+import { useStepReset } from '@/hooks/useStepReset';
+import DailyMissionWidget from '@/components/DailyMissionWidget';
+import ExerciseGrid from '@/components/ExerciseGrid';
 
 const Index = () => {
   const { userData, updateSteps } = useUserData();
+  const { saveCurrentSteps, resetSteps, undoReset, canUndo } = useStepReset();
   const [customSteps, setCustomSteps] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [motivationalMessage, setMotivationalMessage] = useState('');
@@ -42,6 +46,17 @@ const Index = () => {
     }
   };
 
+  const handleResetSteps = () => {
+    saveCurrentSteps(userData.steps);
+    const newSteps = resetSteps();
+    updateSteps(newSteps, currentDate);
+  };
+
+  const handleUndoReset = () => {
+    const previousSteps = undoReset();
+    updateSteps(previousSteps, currentDate);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 text-white font-satoshi">
       {/* Header */}
@@ -53,6 +68,11 @@ const Index = () => {
             {motivationalMessage}
           </div>
         )}
+      </div>
+
+      {/* Daily Mission Widget */}
+      <div className="px-4 mb-6">
+        <DailyMissionWidget currentSteps={userData.steps} />
       </div>
 
       {/* Progress Circle */}
@@ -156,11 +176,32 @@ const Index = () => {
             </Button>
           </div>
         )}
+
+        {/* Reset and Undo Buttons */}
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <Button 
+            onClick={handleResetSteps}
+            variant="outline"
+            className="border-red-500/50 text-red-400 hover:bg-red-500/20 h-10 flex items-center gap-2"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Resetear
+          </Button>
+          <Button 
+            onClick={handleUndoReset}
+            disabled={!canUndo}
+            variant="outline"
+            className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20 h-10 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Undo className="w-4 h-4" />
+            Deshacer
+          </Button>
+        </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards with Exercise Grid */}
       <div className="px-4 mb-6 animate-fade-in-up">
-        <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="grid grid-cols-3 gap-4 text-center mb-4">
           <Card className="glass-card border-primary-500/20 transition-all duration-200 hover:border-primary-400/40">
             <CardContent className="p-4">
               <div className="text-2xl font-bold text-white mb-1">
@@ -186,6 +227,17 @@ const Index = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Exercise Grid */}
+        <Card className="glass-card border-primary-500/20">
+          <CardContent className="p-4">
+            <ExerciseGrid 
+              time={userData.dailyData[currentDate]?.time || `${Math.floor(userData.steps / 120)}h ${Math.floor((userData.steps % 120) / 2)}m`}
+              calories={userData.dailyData[currentDate]?.calories || Math.round(userData.steps * 0.04)}
+              distance={userData.dailyData[currentDate]?.distance || +(userData.steps * 0.0008).toFixed(2)}
+            />
+          </CardContent>
+        </Card>
       </div>
 
       {/* Goal Status */}
@@ -203,7 +255,7 @@ const Index = () => {
       )}
 
       {/* Streak Display */}
-      <div className="mx-4 mb-6 animate-fade-in-up">
+      <div className="mx-4 mb-20 animate-fade-in-up">
         <Card className="glass-card border-primary-500/20">
           <CardContent className="p-4">
             <div className="text-center">
