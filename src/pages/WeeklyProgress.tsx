@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Home, Calendar as CalendarIcon, User, Activity, CheckCircle, MoreHorizontal, Coins, Award, TrendingUp } from 'lucide-react';
+import { Home, Calendar as CalendarIcon, User, Activity, CheckCircle, MoreHorizontal, Coins, Award, TrendingUp, ShoppingBag, Lightbulb } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserData } from '@/hooks/useUserData';
 import AchievementCard from '@/components/AchievementCard';
@@ -10,14 +9,21 @@ import RecentActivity from '@/components/RecentActivity';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 
 const WeeklyProgressPage = () => {
-  const { userData, completeTask, getRecentActivity } = useUserData();
+  const { userData, completeTask, getRecentActivity, setUserData } = useUserData();
   const recentActivity = getRecentActivity();
 
-  const handleCompleteTask = (taskId: string) => {
-    completeTask(taskId);
+  const handleToggleTask = (taskId: string) => {
+    setUserData(prev => ({
+      ...prev,
+      tasks: prev.tasks.map(task => 
+        task.id === taskId 
+          ? { ...task, completed: !task.completed, current: task.completed ? 0 : task.target }
+          : task
+      )
+    }));
   };
 
-  // Weekly data for chart
+  // Weekly data for chart with step counts
   const weeklyData = [
     { day: 'Lun', steps: 8500 },
     { day: 'Mar', steps: 7200 },
@@ -32,6 +38,27 @@ const WeeklyProgressPage = () => {
   const achievements = userData.achievements || [];
   const unlockedAchievements = achievements.filter(a => a.unlocked);
   const lockedAchievements = achievements.filter(a => !a.unlocked);
+
+  // Extended store items
+  const storeItems = [
+    { name: 'Insignia Fundador', price: 500, icon: '🏅' },
+    { name: 'Boost XP x2', price: 900, icon: '⚡' },
+    { name: 'Meta Personalizada', price: 750, icon: '🎯' },
+    { name: 'Tema Dorado', price: 1200, icon: '✨' },
+    { name: 'Racha Protector', price: 1500, icon: '🛡️' },
+    { name: 'Multiplicador Pasos', price: 2000, icon: '🚀' },
+    { name: 'Avatar Premium', price: 800, icon: '👑' },
+    { name: 'Estadísticas Pro', price: 1100, icon: '📊' }
+  ];
+
+  // Tips for earning pasocoins
+  const pasocoinTips = [
+    "Completa tareas diarias para ganar 50 Pasocoins",
+    "Alcanza tu meta diaria para bonos extra",
+    "Mantén una racha de 7 días para 200 Pasocoins",
+    "Desbloquea logros para obtener recompensas",
+    "Participa en desafíos semanales"
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 text-white font-satoshi">
@@ -97,7 +124,12 @@ const WeeklyProgressPage = () => {
                   tickLine={false}
                   tick={{ fill: '#C084FC', fontSize: 12 }}
                 />
-                <YAxis hide />
+                <YAxis 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#C084FC', fontSize: 10 }}
+                  tickFormatter={(value) => `${(value/1000).toFixed(1)}k`}
+                />
                 <Line 
                   type="monotone" 
                   dataKey="steps" 
@@ -108,6 +140,15 @@ const WeeklyProgressPage = () => {
                 />
               </LineChart>
             </ResponsiveContainer>
+          </div>
+          {/* Show daily step counts */}
+          <div className="grid grid-cols-7 gap-2 mt-4 text-xs text-center">
+            {weeklyData.map((day, index) => (
+              <div key={index} className="bg-primary-700/30 rounded-lg p-2">
+                <div className="text-primary-200">{day.day}</div>
+                <div className="text-white font-semibold">{day.steps.toLocaleString()}</div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -160,9 +201,12 @@ const WeeklyProgressPage = () => {
             {userData.tasks.map((task) => (
               <div key={task.id} className="flex items-center justify-between p-3 bg-primary-700/30 rounded-lg border border-primary-500/20 transition-all duration-200 hover:bg-primary-700/40">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
-                    task.completed ? 'bg-green-500 animate-bounce-subtle' : 'bg-primary-600'
-                  }`}>
+                  <div 
+                    onClick={() => handleToggleTask(task.id)}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer ${
+                      task.completed ? 'bg-green-500 animate-bounce-subtle' : 'bg-primary-600 hover:bg-primary-500'
+                    }`}
+                  >
                     {task.completed ? (
                       <CheckCircle className="w-4 h-4 text-white" />
                     ) : (
@@ -170,27 +214,15 @@ const WeeklyProgressPage = () => {
                     )}
                   </div>
                   <div>
-                    <span className="text-white font-medium">{task.title}</span>
+                    <span className={`font-medium ${task.completed ? 'text-green-400 line-through' : 'text-white'}`}>
+                      {task.title}
+                    </span>
                     {!task.completed && (
                       <div className="text-xs text-primary-200">
                         {task.current}/{task.target} - {task.xp} XP
                       </div>
                     )}
                   </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  {task.completed ? (
-                    <CheckCircle className="w-6 h-6 text-green-400" />
-                  ) : (
-                    <Button 
-                      onClick={() => handleCompleteTask(task.id)}
-                      variant="ghost" 
-                      size="sm" 
-                      className="p-2 h-auto button-hover"
-                    >
-                      <div className="w-6 h-6 border-2 border-gray-400 rounded-full hover:border-primary-400 transition-colors"></div>
-                    </Button>
-                  )}
                 </div>
               </div>
             ))}
@@ -211,33 +243,48 @@ const WeeklyProgressPage = () => {
         </CardContent>
       </Card>
 
-      {/* Store Section */}
+      {/* Pasocoins Tips */}
+      <Card className="mx-4 mt-6 glass-card border-primary-500/20 animate-fade-in-up">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Lightbulb className="w-5 h-5 text-yellow-400" />
+            <h3 className="text-lg font-semibold text-white">Consejos para Ganar Pasocoins</h3>
+          </div>
+          <div className="space-y-2">
+            {pasocoinTips.map((tip, index) => (
+              <div key={index} className="flex items-start gap-2 text-sm text-primary-200">
+                <div className="w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center text-xs text-black font-bold mt-0.5">
+                  {index + 1}
+                </div>
+                <span>{tip}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Enhanced Store Section */}
       <Card className="mx-4 mt-6 mb-20 glass-card border-primary-500/20 animate-fade-in-up">
         <CardContent className="p-4">
-          <h3 className="text-lg font-semibold mb-4 text-white">Tienda</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <ShoppingBag className="w-5 h-5 text-purple-400" />
+            <h3 className="text-lg font-semibold text-white">Tienda</h3>
+          </div>
           
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { name: 'Insignia Fundador', price: 500 },
-              { name: 'Boost XP x2', price: 900 },
-              { name: 'Meta Personalizada', price: 750 }
-            ].map((item, index) => (
-              <div key={index} className="flex flex-col items-center transition-transform duration-200 hover:scale-105">
-                <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mb-2 relative achievement-badge">
-                  <div className="w-8 h-8 bg-yellow-300 rounded-full flex items-center justify-center">
-                    <Coins className="w-4 h-4 text-yellow-800" />
-                  </div>
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2">
-                    <div className="w-6 h-4 bg-blue-500 rounded-t-lg flex items-center justify-center">
-                      <div className="w-2 h-2 bg-blue-300 rounded-full"></div>
-                    </div>
-                  </div>
+          <div className="grid grid-cols-2 gap-4">
+            {storeItems.map((item, index) => (
+              <div key={index} className="flex flex-col items-center p-3 bg-primary-700/30 rounded-lg border border-primary-500/20 transition-transform duration-200 hover:scale-105">
+                <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mb-2 text-xl">
+                  {item.icon}
                 </div>
                 <div className="text-center">
                   <div className="text-xs text-primary-200 mb-1 font-medium">{item.name}</div>
-                  <div className="text-xs font-semibold bg-purple-600 px-2 py-1 rounded text-white button-hover cursor-pointer">
+                  <Button 
+                    size="sm"
+                    className="text-xs font-semibold bg-purple-600 hover:bg-purple-700 px-3 py-1 h-auto"
+                  >
                     {item.price} PC
-                  </div>
+                  </Button>
                 </div>
               </div>
             ))}

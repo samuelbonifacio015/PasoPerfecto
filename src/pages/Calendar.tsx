@@ -5,26 +5,86 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Home, Calendar as CalendarIcon, User, CheckCircle, Plus, Clock, Zap, MapPin, Target, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserData } from '@/hooks/useUserData';
+import { useDailyProgress } from '@/hooks/useDailyProgress';
 
 const Calendar = () => {
   const { userData, updateSteps } = useUserData();
-  const [selectedDate, setSelectedDate] = useState('2025-12-14');
-  const currentDate = new Date();
-  const currentMonth = 'December';
-  const currentYear = 2025;
+  const { getProgressForDate } = useDailyProgress();
+  const [selectedDate, setSelectedDate] = useState('2025-06-06');
+  const [currentMonth, setCurrentMonth] = useState(5); // June (0-indexed)
+  const [currentYear, setCurrentYear] = useState(2025);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [planType, setPlanType] = useState<'weekly' | 'monthly'>('weekly');
   
-  // Días del calendario
-  const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  const calendarDays = [
-    [27, 28, 29, 30, 1, 2, 3],
-    [4, 5, 6, 7, 8, 9, 10],
-    [11, 12, 13, 14, 15, 16, 17],
-    [18, 19, 20, 21, 22, 23, 24],
-    [25, 26, 27, 28, 29, 30, 31],
-    [1, 2, 3, 4, 5, 6, 7]
-  ];
+  const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+  
+  // Función para obtener los días del mes
+  const getDaysInMonth = (month: number, year: number) => {
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+    
+    const days = [];
+    
+    // Días del mes anterior
+    for (let i = firstDay - 1; i >= 0; i--) {
+      days.push({
+        day: daysInPrevMonth - i,
+        isCurrentMonth: false,
+        date: `${year}-${String(month).padStart(2, '0')}-${String(daysInPrevMonth - i).padStart(2, '0')}`
+      });
+    }
+    
+    // Días del mes actual
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push({
+        day,
+        isCurrentMonth: true,
+        date: `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+      });
+    }
+    
+    // Días del mes siguiente para completar la grilla
+    const remainingDays = 42 - days.length;
+    for (let day = 1; day <= remainingDays; day++) {
+      days.push({
+        day,
+        isCurrentMonth: false,
+        date: `${year}-${String(month + 2).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+      });
+    }
+    
+    return days;
+  };
 
-  const selectedDayData = userData.dailyData[selectedDate] || { 
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      if (currentMonth === 0) {
+        setCurrentMonth(11);
+        setCurrentYear(currentYear - 1);
+      } else {
+        setCurrentMonth(currentMonth - 1);
+      }
+    } else {
+      if (currentMonth === 11) {
+        setCurrentMonth(0);
+        setCurrentYear(currentYear + 1);
+      } else {
+        setCurrentMonth(currentMonth + 1);
+      }
+    }
+  };
+
+  const daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const calendarDays = getDaysInMonth(currentMonth, currentYear);
+  
+  // Organizar días en semanas
+  const weeks = [];
+  for (let i = 0; i < calendarDays.length; i += 7) {
+    weeks.push(calendarDays.slice(i, i + 7));
+  }
+
+  const selectedDayData = userData.dailyData[selectedDate] || getProgressForDate(selectedDate) || { 
     steps: 0, 
     tasks: [], 
     xpEarned: 0, 
@@ -33,6 +93,7 @@ const Calendar = () => {
     time: '0h 0m' 
   };
   const isGoalCompleted = selectedDayData.steps >= userData.dailyGoal;
+  const today = new Date().toISOString().split('T')[0];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 text-white font-satoshi">
@@ -41,14 +102,14 @@ const Calendar = () => {
         <div className="flex items-center space-x-4">
           <div>
             <div className="text-3xl font-bold text-white">{currentYear}</div>
-            <div className="text-xl text-primary-200">{currentMonth}</div>
+            <div className="text-xl text-primary-200">{monthNames[currentMonth]}</div>
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" className="text-white hover:bg-primary-600/50 button-hover">
+          <Button onClick={() => navigateMonth('prev')} variant="ghost" size="sm" className="text-white hover:bg-primary-600/50 button-hover">
             <ChevronLeft className="w-5 h-5" />
           </Button>
-          <Button variant="ghost" size="sm" className="text-white hover:bg-primary-600/50 button-hover">
+          <Button onClick={() => navigateMonth('next')} variant="ghost" size="sm" className="text-white hover:bg-primary-600/50 button-hover">
             <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
@@ -67,31 +128,29 @@ const Calendar = () => {
           </div>
           
           {/* Calendar days */}
-          {calendarDays.map((week, weekIndex) => (
+          {weeks.map((week, weekIndex) => (
             <div key={weekIndex} className="grid grid-cols-7 gap-2 mb-2">
-              {week.map((day, dayIndex) => {
-                const isToday = day === 14 && weekIndex === 2;
-                const isPreviousMonth = (weekIndex === 0 && day > 20) || (weekIndex === 5 && day < 7);
-                const dateKey = `2025-12-${day.toString().padStart(2, '0')}`;
-                const hasData = userData.dailyData[dateKey]?.steps > 0;
-                const dayGoalMet = userData.dailyData[dateKey]?.steps >= userData.dailyGoal;
+              {week.map((dayInfo, dayIndex) => {
+                const isToday = dayInfo.date === today;
+                const hasData = userData.dailyData[dayInfo.date]?.steps > 0 || getProgressForDate(dayInfo.date)?.steps > 0;
+                const dayGoalMet = (userData.dailyData[dayInfo.date]?.steps || getProgressForDate(dayInfo.date)?.steps || 0) >= userData.dailyGoal;
                 
                 return (
                   <div
                     key={dayIndex}
-                    onClick={() => !isPreviousMonth && setSelectedDate(dateKey)}
+                    onClick={() => dayInfo.isCurrentMonth && setSelectedDate(dayInfo.date)}
                     className={`text-center py-3 rounded-lg transition-all duration-200 cursor-pointer relative button-hover ${
                       isToday 
                         ? 'bg-primary-500 text-white font-bold shadow-lg border-2 border-primary-300' 
-                        : isPreviousMonth 
+                        : !dayInfo.isCurrentMonth 
                         ? 'text-gray-600' 
-                        : selectedDate === dateKey
+                        : selectedDate === dayInfo.date
                         ? 'bg-primary-600/70 text-white border border-primary-400'
                         : 'text-white hover:bg-primary-600/30'
                     }`}
                   >
-                    {day}
-                    {hasData && !isPreviousMonth && (
+                    {dayInfo.day}
+                    {hasData && dayInfo.isCurrentMonth && (
                       <div className={`absolute top-1 right-1 w-2 h-2 rounded-full ${
                         dayGoalMet ? 'bg-green-400' : 'bg-yellow-400'
                       }`}></div>
@@ -104,10 +163,28 @@ const Calendar = () => {
         </CardContent>
       </Card>
 
+      {/* Plan Creation Buttons */}
+      <div className="mx-4 mt-4 grid grid-cols-2 gap-4 animate-fade-in-up">
+        <Button 
+          onClick={() => {setPlanType('weekly'); setShowPlanModal(true);}}
+          className="bg-blue-600 hover:bg-blue-700 h-12 flex items-center gap-2 font-semibold"
+        >
+          <Target className="w-4 h-4" />
+          Plan Semanal
+        </Button>
+        <Button 
+          onClick={() => {setPlanType('monthly'); setShowPlanModal(true);}}
+          className="bg-purple-600 hover:bg-purple-700 h-12 flex items-center gap-2 font-semibold"
+        >
+          <CalendarIcon className="w-4 h-4" />
+          Plan Mensual
+        </Button>
+      </div>
+
       {/* Daily Summary */}
       <Card className="mx-4 mt-6 glass-card border-primary-500/20 animate-fade-in-up">
         <CardContent className="p-4">
-          <h3 className="text-lg font-semibold mb-4 text-white">Resumen Del Día</h3>
+          <h3 className="text-lg font-semibold mb-4 text-white">Resumen Del Día ({selectedDate})</h3>
           
           {/* Step Goal Status */}
           <div className={`flex items-center justify-between p-4 rounded-lg border mb-4 transition-all duration-200 ${
@@ -152,13 +229,39 @@ const Calendar = () => {
               <div className="text-sm text-primary-200">Km</div>
             </div>
           </div>
-
-          <Button className="w-full mt-6 bg-primary-500 hover:bg-primary-600 h-12 flex items-center gap-2 text-lg font-semibold border border-primary-400/30 shadow-lg button-hover">
-            <Plus className="w-5 h-5" />
-            <span>Crear Un Objetivo</span>
-          </Button>
         </CardContent>
       </Card>
+
+      {/* Plan Modal Placeholder */}
+      {showPlanModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md glass-card border-primary-500/20">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-white mb-4">
+                Crear {planType === 'weekly' ? 'Plan Semanal' : 'Plan Mensual'}
+              </h3>
+              <p className="text-primary-200 mb-4">
+                Define tu objetivo de pasos para {planType === 'weekly' ? 'esta semana' : 'este mes'}
+              </p>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setShowPlanModal(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={() => setShowPlanModal(false)}
+                  className="flex-1 bg-primary-600 hover:bg-primary-700"
+                >
+                  Crear Plan
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-primary-800/95 backdrop-blur-md border-t border-primary-500/20">

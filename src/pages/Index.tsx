@@ -1,17 +1,19 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Home, Calendar as CalendarIcon, User, Target, Plus, Activity, RotateCcw, Undo } from 'lucide-react';
+import { Home, Calendar as CalendarIcon, User, Target, Plus, Activity, RotateCcw, Undo, Save } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserData } from '@/hooks/useUserData';
 import { useStepReset } from '@/hooks/useStepReset';
+import { useDailyProgress } from '@/hooks/useDailyProgress';
 import DailyMissionWidget from '@/components/DailyMissionWidget';
 import ExerciseGrid from '@/components/ExerciseGrid';
+import EditableStatCard from '@/components/EditableStatCard';
 
 const Index = () => {
   const { userData, updateSteps } = useUserData();
   const { saveCurrentSteps, resetSteps, undoReset, canUndo } = useStepReset();
+  const { saveProgress, updateTimeCaloriesDistance, getProgressForDate } = useDailyProgress();
   const [customSteps, setCustomSteps] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [motivationalMessage, setMotivationalMessage] = useState('');
@@ -19,6 +21,7 @@ const Index = () => {
   const progressPercentage = Math.min((userData.steps / userData.dailyGoal) * 100, 100);
   const isGoalCompleted = userData.steps >= userData.dailyGoal;
   const currentDate = new Date().toISOString().split('T')[0];
+  const displayDate = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
 
   const motivationalMessages = [
     "¡Excelente trabajo, Samuel!",
@@ -27,6 +30,11 @@ const Index = () => {
     "¡Increíble progreso hoy!",
     "¡Eres imparable!"
   ];
+
+  // Get current day's data
+  const currentTime = userData.dailyData[currentDate]?.time || `${Math.floor(userData.steps / 120)}h ${Math.floor((userData.steps % 120) / 2)}m`;
+  const currentCalories = userData.dailyData[currentDate]?.calories || Math.round(userData.steps * 0.04);
+  const currentDistance = userData.dailyData[currentDate]?.distance || +(userData.steps * 0.0008).toFixed(2);
 
   const handleAddSteps = (steps: number) => {
     const newSteps = userData.steps + steps;
@@ -57,12 +65,26 @@ const Index = () => {
     updateSteps(previousSteps, currentDate);
   };
 
+  const handleSaveProgress = () => {
+    saveProgress(currentDate, userData.steps, currentTime, currentCalories, currentDistance);
+    setMotivationalMessage('¡Progreso guardado correctamente!');
+    setTimeout(() => setMotivationalMessage(''), 3000);
+  };
+
+  const handleUpdateStat = (field: 'time' | 'calories' | 'distance', value: string) => {
+    updateTimeCaloriesDistance(currentDate, field, field === 'calories' || field === 'distance' ? Number(value) : value);
+    updateSteps(userData.steps, currentDate); // Trigger update to sync with userData
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 text-white font-satoshi">
       {/* Header */}
       <div className="text-center pt-12 pb-6 animate-fade-in-up">
         <h1 className="text-2xl font-bold text-white mb-2">PasoPerfecto</h1>
-        <p className="text-primary-200">¡Sigue caminando hacia tu meta!</p>
+        <div className="flex items-center justify-center gap-2">
+          <p className="text-primary-200">¡Sigue caminando hacia tu meta!</p>
+          <span className="text-sm bg-primary-600/50 px-2 py-1 rounded-lg text-primary-200">{displayDate}</span>
+        </div>
         {motivationalMessage && (
           <div className="mt-2 text-green-400 font-medium animate-bounce-subtle">
             {motivationalMessage}
@@ -177,6 +199,15 @@ const Index = () => {
           </div>
         )}
 
+        {/* Save Progress Button */}
+        <Button 
+          onClick={handleSaveProgress}
+          className="w-full mt-4 bg-green-600 hover:bg-green-700 h-12 flex items-center gap-2 text-lg font-semibold border border-green-500/30 shadow-lg button-hover"
+        >
+          <Save className="w-5 h-5" />
+          <span>Guardar Progreso del Día</span>
+        </Button>
+
         {/* Reset and Undo Buttons */}
         <div className="grid grid-cols-2 gap-3 mt-4">
           <Button 
@@ -202,39 +233,30 @@ const Index = () => {
       {/* Stats Cards with Exercise Grid */}
       <div className="px-4 mb-6 animate-fade-in-up">
         <div className="grid grid-cols-3 gap-4 text-center mb-4">
-          <Card className="glass-card border-primary-500/20 transition-all duration-200 hover:border-primary-400/40">
-            <CardContent className="p-4">
-              <div className="text-2xl font-bold text-white mb-1">
-                {userData.dailyData[currentDate]?.time || '0h 0m'}
-              </div>
-              <div className="text-sm text-primary-200">Tiempo</div>
-            </CardContent>
-          </Card>
-          <Card className="glass-card border-primary-500/20 transition-all duration-200 hover:border-primary-400/40">
-            <CardContent className="p-4">
-              <div className="text-2xl font-bold text-white mb-1">
-                {userData.dailyData[currentDate]?.calories || Math.round(userData.steps * 0.04)}
-              </div>
-              <div className="text-sm text-primary-200">Calorías</div>
-            </CardContent>
-          </Card>
-          <Card className="glass-card border-primary-500/20 transition-all duration-200 hover:border-primary-400/40">
-            <CardContent className="p-4">
-              <div className="text-2xl font-bold text-white mb-1">
-                {userData.dailyData[currentDate]?.distance || (userData.steps * 0.0008).toFixed(2)}
-              </div>
-              <div className="text-sm text-primary-200">Km</div>
-            </CardContent>
-          </Card>
+          <EditableStatCard
+            title="Tiempo"
+            value={currentTime}
+            onSave={(value) => handleUpdateStat('time', value)}
+          />
+          <EditableStatCard
+            title="Calorías"
+            value={currentCalories}
+            onSave={(value) => handleUpdateStat('calories', value)}
+          />
+          <EditableStatCard
+            title="Km"
+            value={currentDistance}
+            onSave={(value) => handleUpdateStat('distance', value)}
+          />
         </div>
 
         {/* Exercise Grid */}
         <Card className="glass-card border-primary-500/20">
           <CardContent className="p-4">
             <ExerciseGrid 
-              time={userData.dailyData[currentDate]?.time || `${Math.floor(userData.steps / 120)}h ${Math.floor((userData.steps % 120) / 2)}m`}
-              calories={userData.dailyData[currentDate]?.calories || Math.round(userData.steps * 0.04)}
-              distance={userData.dailyData[currentDate]?.distance || +(userData.steps * 0.0008).toFixed(2)}
+              time={currentTime}
+              calories={currentCalories}
+              distance={currentDistance}
             />
           </CardContent>
         </Card>
