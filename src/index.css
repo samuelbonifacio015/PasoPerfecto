@@ -73,7 +73,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-satoshi;
     @apply dark;
     background: linear-gradient(135deg, #1A1A2F 0%, #242443 50%, #472A6C 100%);
     min-height: 100vh;
@@ -85,7 +85,7 @@
     box-shadow: 0 0 30px rgba(122, 18, 255, 0.4), 0 0 60px rgba(122, 18, 255, 0.1);
   }
   
-  .gradient-purple {
+  .bg-gradient-purple {
     background: linear-gradient(135deg, #7A12FF 0%, #472A6C 50%, #242443 100%);
   }
 
@@ -128,5 +128,19 @@
 
   .border-gradient {
     border-image: linear-gradient(135deg, #7A12FF, #472A6C) 1;
+  }
+
+  .button-hover {
+    transition: all 0.3s ease;
+  }
+
+  .button-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(122, 18, 255, 0.3);
+  }
+
+  .achievement-badge {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
   }
 }

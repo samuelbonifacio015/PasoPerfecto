@@ -1,6 +1,18 @@
 
 import { useLocalStorage } from './useLocalStorage';
 
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+  unlockedDate?: string;
+  type: 'steps' | 'streak' | 'challenge' | 'milestone';
+  requirement: number;
+  currentProgress: number;
+}
+
 export interface UserData {
   level: number;
   xp: number;
@@ -8,6 +20,9 @@ export interface UserData {
   steps: number;
   dailyGoal: number;
   pasocoins: number;
+  streak: number;
+  totalSteps: number;
+  achievements: Achievement[];
   tasks: {
     id: string;
     title: string;
@@ -21,9 +36,76 @@ export interface UserData {
       steps: number;
       tasks: string[];
       xpEarned: number;
+      calories: number;
+      distance: number;
+      time: string;
     };
   };
 }
+
+const defaultAchievements: Achievement[] = [
+  {
+    id: 'first-steps',
+    title: 'Primeros Pasos',
+    description: 'Completa tus primeros 1,000 pasos',
+    icon: '👣',
+    unlocked: true,
+    unlockedDate: '2025-12-10',
+    type: 'steps',
+    requirement: 1000,
+    currentProgress: 1000
+  },
+  {
+    id: 'daily-goal',
+    title: 'Meta Diaria',
+    description: 'Alcanza tu meta diaria de 10,000 pasos',
+    icon: '🎯',
+    unlocked: false,
+    type: 'steps',
+    requirement: 10000,
+    currentProgress: 6000
+  },
+  {
+    id: 'week-warrior',
+    title: 'Guerrero Semanal',
+    description: 'Completa 7 días seguidos alcanzando tu meta',
+    icon: '🔥',
+    unlocked: false,
+    type: 'streak',
+    requirement: 7,
+    currentProgress: 3
+  },
+  {
+    id: 'step-master',
+    title: 'Maestro de Pasos',
+    description: 'Alcanza 50,000 pasos totales',
+    icon: '👑',
+    unlocked: false,
+    type: 'milestone',
+    requirement: 50000,
+    currentProgress: 25000
+  },
+  {
+    id: 'marathon-walker',
+    title: 'Caminante Maratón',
+    description: 'Camina 25,000 pasos en un día',
+    icon: '🏃‍♂️',
+    unlocked: false,
+    type: 'challenge',
+    requirement: 25000,
+    currentProgress: 0
+  },
+  {
+    id: 'consistency-king',
+    title: 'Rey de Consistencia',
+    description: 'Mantén una racha de 30 días',
+    icon: '⚡',
+    unlocked: false,
+    type: 'streak',
+    requirement: 30,
+    currentProgress: 3
+  }
+];
 
 export const useUserData = () => {
   const [userData, setUserData] = useLocalStorage<UserData>('pasoperfecto-user-data', {
@@ -33,6 +115,9 @@ export const useUserData = () => {
     steps: 6000,
     dailyGoal: 10000,
     pasocoins: 1250,
+    streak: 3,
+    totalSteps: 25000,
+    achievements: defaultAchievements,
     tasks: [
       {
         id: '1',
@@ -49,23 +134,60 @@ export const useUserData = () => {
         current: 1000,
         completed: true,
         xp: 50
+      },
+      {
+        id: '3',
+        title: 'Caminar 30 minutos',
+        target: 30,
+        current: 25,
+        completed: false,
+        xp: 75
       }
     ],
     dailyData: {}
   });
 
   const updateSteps = (steps: number, date: string) => {
-    setUserData(prev => ({
-      ...prev,
-      steps,
-      dailyData: {
-        ...prev.dailyData,
-        [date]: {
-          ...prev.dailyData[date],
-          steps
+    setUserData(prev => {
+      const newTotalSteps = prev.totalSteps + (steps - prev.steps);
+      const updatedAchievements = prev.achievements.map(achievement => {
+        let newProgress = achievement.currentProgress;
+        
+        if (achievement.type === 'steps' && achievement.id === 'daily-goal') {
+          newProgress = steps;
+        } else if (achievement.type === 'milestone' && achievement.id === 'step-master') {
+          newProgress = newTotalSteps;
+        } else if (achievement.type === 'challenge' && achievement.id === 'marathon-walker') {
+          newProgress = Math.max(newProgress, steps);
         }
-      }
-    }));
+
+        const shouldUnlock = !achievement.unlocked && newProgress >= achievement.requirement;
+        
+        return {
+          ...achievement,
+          currentProgress: newProgress,
+          unlocked: shouldUnlock || achievement.unlocked,
+          unlockedDate: shouldUnlock ? date : achievement.unlockedDate
+        };
+      });
+
+      return {
+        ...prev,
+        steps,
+        totalSteps: newTotalSteps,
+        achievements: updatedAchievements,
+        dailyData: {
+          ...prev.dailyData,
+          [date]: {
+            ...prev.dailyData[date],
+            steps,
+            calories: Math.round(steps * 0.04),
+            distance: +(steps * 0.0008).toFixed(2),
+            time: `${Math.floor(steps / 120)}h ${Math.floor((steps % 120) / 2)}m`
+          }
+        }
+      };
+    });
   };
 
   const completeTask = (taskId: string) => {
@@ -89,16 +211,25 @@ export const useUserData = () => {
         maxXp: newMaxXp,
         pasocoins: prev.pasocoins + 50,
         tasks: prev.tasks.map(t => 
-          t.id === taskId ? { ...t, completed: true } : t
+          t.id === taskId ? { ...t, completed: true, current: t.target } : t
         )
       };
     });
+  };
+
+  const getRecentActivity = () => {
+    const dates = Object.keys(userData.dailyData).sort().reverse().slice(0, 5);
+    return dates.map(date => ({
+      date,
+      ...userData.dailyData[date]
+    }));
   };
 
   return {
     userData,
     updateSteps,
     completeTask,
+    getRecentActivity,
     setUserData
   };
 };

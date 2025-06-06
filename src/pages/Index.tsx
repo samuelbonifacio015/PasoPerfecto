@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,14 +10,28 @@ const Index = () => {
   const { userData, updateSteps } = useUserData();
   const [customSteps, setCustomSteps] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
+  const [motivationalMessage, setMotivationalMessage] = useState('');
 
   const progressPercentage = Math.min((userData.steps / userData.dailyGoal) * 100, 100);
   const isGoalCompleted = userData.steps >= userData.dailyGoal;
   const currentDate = new Date().toISOString().split('T')[0];
 
+  const motivationalMessages = [
+    "¡Excelente trabajo, Samuel!",
+    "¡Sigue así, estás haciendo genial!",
+    "¡Cada paso cuenta hacia tu meta!",
+    "¡Increíble progreso hoy!",
+    "¡Eres imparable!"
+  ];
+
   const handleAddSteps = (steps: number) => {
     const newSteps = userData.steps + steps;
     updateSteps(newSteps, currentDate);
+    
+    // Show motivational message
+    const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+    setMotivationalMessage(randomMessage);
+    setTimeout(() => setMotivationalMessage(''), 3000);
   };
 
   const handleCustomSteps = () => {
@@ -27,19 +42,21 @@ const Index = () => {
     }
   };
 
-  // SVG definitions for the progress circle
-  
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 text-white font-satoshi">
       {/* Header */}
-      <div className="text-center pt-12 pb-6">
+      <div className="text-center pt-12 pb-6 animate-fade-in-up">
         <h1 className="text-2xl font-bold text-white mb-2">PasoPerfecto</h1>
         <p className="text-primary-200">¡Sigue caminando hacia tu meta!</p>
+        {motivationalMessage && (
+          <div className="mt-2 text-green-400 font-medium animate-bounce-subtle">
+            {motivationalMessage}
+          </div>
+        )}
       </div>
 
       {/* Progress Circle */}
-      <div className="flex justify-center mb-8">
+      <div className="flex justify-center mb-8 animate-fade-in-up">
         <div className="relative">
           <svg className="transform -rotate-90" width="280" height="280">
             <defs>
@@ -92,23 +109,23 @@ const Index = () => {
       </div>
 
       {/* Quick Action Buttons */}
-      <div className="px-4 mb-6">
+      <div className="px-4 mb-6 animate-fade-in-up">
         <div className="grid grid-cols-3 gap-3 mb-4">
           <Button 
             onClick={() => handleAddSteps(1000)}
-            className="bg-primary-600/80 hover:bg-primary-500 border border-primary-400/30 h-12 font-semibold text-lg backdrop-blur-sm"
+            className="bg-primary-600/80 hover:bg-primary-500 border border-primary-400/30 h-12 font-semibold text-lg backdrop-blur-sm button-hover"
           >
             +1000
           </Button>
           <Button 
             onClick={() => handleAddSteps(3000)}
-            className="bg-primary-600/80 hover:bg-primary-500 border border-primary-400/30 h-12 font-semibold text-lg backdrop-blur-sm"
+            className="bg-primary-600/80 hover:bg-primary-500 border border-primary-400/30 h-12 font-semibold text-lg backdrop-blur-sm button-hover"
           >
             +3000
           </Button>
           <Button 
             onClick={() => handleAddSteps(6000)}
-            className="bg-primary-600/80 hover:bg-primary-500 border border-primary-400/30 h-12 font-semibold text-lg backdrop-blur-sm"
+            className="bg-primary-600/80 hover:bg-primary-500 border border-primary-400/30 h-12 font-semibold text-lg backdrop-blur-sm button-hover"
           >
             +6000
           </Button>
@@ -117,7 +134,7 @@ const Index = () => {
         {!showCustomInput ? (
           <Button 
             onClick={() => setShowCustomInput(true)}
-            className="w-full bg-gradient-purple hover:bg-primary-500 h-12 flex items-center gap-2 text-lg font-semibold border border-primary-400/30 shadow-lg"
+            className="w-full bg-gradient-purple hover:bg-primary-500 h-12 flex items-center gap-2 text-lg font-semibold border border-primary-400/30 shadow-lg button-hover"
           >
             <Plus className="w-5 h-5" />
             <span>Personalizar Pasos</span>
@@ -129,11 +146,11 @@ const Index = () => {
               value={customSteps}
               onChange={(e) => setCustomSteps(e.target.value)}
               placeholder="Ingresa pasos"
-              className="flex-1 px-4 py-3 bg-primary-700/50 border border-primary-500/30 rounded-lg text-white placeholder-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-400"
+              className="flex-1 px-4 py-3 bg-primary-700/50 border border-primary-500/30 rounded-lg text-white placeholder-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-400 transition-all duration-200"
             />
             <Button 
               onClick={handleCustomSteps}
-              className="bg-primary-500 hover:bg-primary-600 px-6"
+              className="bg-primary-500 hover:bg-primary-600 px-6 button-hover"
             >
               Agregar
             </Button>
@@ -142,23 +159,29 @@ const Index = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="px-4 mb-6">
+      <div className="px-4 mb-6 animate-fade-in-up">
         <div className="grid grid-cols-3 gap-4 text-center">
-          <Card className="glass-card border-primary-500/20">
+          <Card className="glass-card border-primary-500/20 transition-all duration-200 hover:border-primary-400/40">
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-white mb-1">1h 35m</div>
+              <div className="text-2xl font-bold text-white mb-1">
+                {userData.dailyData[currentDate]?.time || '0h 0m'}
+              </div>
               <div className="text-sm text-primary-200">Tiempo</div>
             </CardContent>
           </Card>
-          <Card className="glass-card border-primary-500/20">
+          <Card className="glass-card border-primary-500/20 transition-all duration-200 hover:border-primary-400/40">
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-white mb-1">300</div>
+              <div className="text-2xl font-bold text-white mb-1">
+                {userData.dailyData[currentDate]?.calories || Math.round(userData.steps * 0.04)}
+              </div>
               <div className="text-sm text-primary-200">Calorías</div>
             </CardContent>
           </Card>
-          <Card className="glass-card border-primary-500/20">
+          <Card className="glass-card border-primary-500/20 transition-all duration-200 hover:border-primary-400/40">
             <CardContent className="p-4">
-              <div className="text-2xl font-bold text-white mb-1">7.58</div>
+              <div className="text-2xl font-bold text-white mb-1">
+                {userData.dailyData[currentDate]?.distance || (userData.steps * 0.0008).toFixed(2)}
+              </div>
               <div className="text-sm text-primary-200">Km</div>
             </CardContent>
           </Card>
@@ -167,11 +190,11 @@ const Index = () => {
 
       {/* Goal Status */}
       {isGoalCompleted && (
-        <div className="mx-4 mb-6">
+        <div className="mx-4 mb-6 animate-fade-in-up">
           <Card className="bg-green-500/20 border-green-500/40">
             <CardContent className="p-4">
               <div className="flex items-center justify-center space-x-2">
-                <Target className="w-6 h-6 text-green-400" />
+                <Target className="w-6 h-6 text-green-400 animate-bounce-subtle" />
                 <span className="text-lg font-semibold text-green-400">¡Meta Completada!</span>
               </div>
             </CardContent>
@@ -179,24 +202,36 @@ const Index = () => {
         </div>
       )}
 
+      {/* Streak Display */}
+      <div className="mx-4 mb-6 animate-fade-in-up">
+        <Card className="glass-card border-primary-500/20">
+          <CardContent className="p-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-yellow-400 mb-1">🔥 {userData.streak}</div>
+              <div className="text-sm text-primary-200">días seguidos</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-primary-800/95 backdrop-blur-md border-t border-primary-500/20">
         <div className="grid grid-cols-4 py-2">
-          <Link to="/" className="flex flex-col items-center py-3">
+          <Link to="/" className="flex flex-col items-center py-3 transition-all duration-200 hover:bg-primary-700/30">
             <Home className="w-6 h-6 text-primary-400" />
             <span className="text-xs text-primary-400 mt-1">Menu</span>
           </Link>
-          <Link to="/weekly-progress" className="flex flex-col items-center py-3">
-            <Activity className="w-6 h-6 text-gray-400" />
-            <span className="text-xs text-gray-400 mt-1">Actividades</span>
+          <Link to="/weekly-progress" className="flex flex-col items-center py-3 transition-all duration-200 hover:bg-primary-700/30">
+            <Activity className="w-6 h-6 text-gray-400 hover:text-primary-300 transition-colors" />
+            <span className="text-xs text-gray-400 hover:text-primary-300 transition-colors mt-1">Actividades</span>
           </Link>
-          <Link to="/calendar" className="flex flex-col items-center py-3">
-            <CalendarIcon className="w-6 h-6 text-gray-400" />
-            <span className="text-xs text-gray-400 mt-1">Calendario</span>
+          <Link to="/calendar" className="flex flex-col items-center py-3 transition-all duration-200 hover:bg-primary-700/30">
+            <CalendarIcon className="w-6 h-6 text-gray-400 hover:text-primary-300 transition-colors" />
+            <span className="text-xs text-gray-400 hover:text-primary-300 transition-colors mt-1">Calendario</span>
           </Link>
-          <Link to="/profile" className="flex flex-col items-center py-3">
-            <User className="w-6 h-6 text-gray-400" />
-            <span className="text-xs text-gray-400 mt-1">Perfil</span>
+          <Link to="/profile" className="flex flex-col items-center py-3 transition-all duration-200 hover:bg-primary-700/30">
+            <User className="w-6 h-6 text-gray-400 hover:text-primary-300 transition-colors" />
+            <span className="text-xs text-gray-400 hover:text-primary-300 transition-colors mt-1">Perfil</span>
           </Link>
         </div>
       </div>
