@@ -28,8 +28,10 @@ const WeeklyProgressPage = () => {
     { day: 'Dom', steps: userData.steps }
   ];
 
-  const unlockedAchievements = userData.achievements.filter(a => a.unlocked);
-  const lockedAchievements = userData.achievements.filter(a => !a.unlocked);
+  // Safety check for achievements
+  const achievements = userData.achievements || [];
+  const unlockedAchievements = achievements.filter(a => a.unlocked);
+  const lockedAchievements = achievements.filter(a => !a.unlocked);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 text-white font-satoshi">
@@ -117,7 +119,7 @@ const WeeklyProgressPage = () => {
             <Award className="w-5 h-5 text-yellow-400" />
             <h3 className="text-lg font-semibold text-white">Logros</h3>
             <span className="text-sm text-primary-200">
-              ({unlockedAchievements.length}/{userData.achievements.length})
+              ({unlockedAchievements.length}/{achievements.length})
             </span>
           </div>
           
