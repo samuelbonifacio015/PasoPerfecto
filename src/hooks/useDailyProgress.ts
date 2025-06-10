@@ -30,6 +30,11 @@ export const useDailyProgress = () => {
       ...prev,
       [date]: {
         ...prev[date],
+        steps: prev[date]?.steps || 0,
+        time: prev[date]?.time || '0h 0m',
+        calories: prev[date]?.calories || 0,
+        distance: prev[date]?.distance || 0,
+        saved: prev[date]?.saved || false,
         [field]: value
       }
     }));
@@ -39,10 +44,21 @@ export const useDailyProgress = () => {
     return dailyProgress[date] || null;
   };
   
+  const markAsSaved = (date: string) => {
+    setDailyProgress(prev => ({
+      ...prev,
+      [date]: {
+        ...prev[date],
+        saved: true
+      }
+    }));
+  };
+  
   return {
     dailyProgress,
     saveProgress,
     updateTimeCaloriesDistance,
-    getProgressForDate
+    getProgressForDate,
+    markAsSaved
   };
 };

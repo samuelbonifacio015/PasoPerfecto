@@ -9,9 +9,10 @@ interface EditableStatCardProps {
   title: string;
   value: string | number;
   onSave: (value: string) => void;
+  icon?: React.ReactNode;
 }
 
-const EditableStatCard: React.FC<EditableStatCardProps> = ({ title, value, onSave }) => {
+const EditableStatCard: React.FC<EditableStatCardProps> = ({ title, value, onSave, icon }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value.toString());
 
@@ -25,6 +26,14 @@ const EditableStatCard: React.FC<EditableStatCardProps> = ({ title, value, onSav
     setIsEditing(false);
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      handleCancel();
+    }
+  };
+
   return (
     <Card className="glass-card border-primary-500/20 transition-all duration-200 hover:border-primary-400/40">
       <CardContent className="p-4">
@@ -33,24 +42,31 @@ const EditableStatCard: React.FC<EditableStatCardProps> = ({ title, value, onSav
             <Input
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
-              className="bg-primary-700/50 border-primary-500/30 text-white"
+              onKeyDown={handleKeyPress}
+              className="bg-primary-700/50 border-primary-500/30 text-white text-center"
+              placeholder={`Nuevo ${title.toLowerCase()}`}
               autoFocus
             />
             <div className="flex gap-2">
-              <Button onClick={handleSave} size="sm" className="bg-green-600 hover:bg-green-700">
+              <Button onClick={handleSave} size="sm" className="flex-1 bg-green-600 hover:bg-green-700">
                 <Check className="w-3 h-3" />
               </Button>
-              <Button onClick={handleCancel} size="sm" variant="outline" className="border-red-500/50 text-red-400 hover:bg-red-500/20">
+              <Button onClick={handleCancel} size="sm" variant="outline" className="flex-1 border-red-500/50 text-red-400 hover:bg-red-500/20">
                 <X className="w-3 h-3" />
               </Button>
             </div>
           </div>
         ) : (
           <div className="relative group">
-            <div className="text-2xl font-bold text-white mb-1">
+            {icon && (
+              <div className="flex justify-center mb-2">
+                {icon}
+              </div>
+            )}
+            <div className="text-2xl font-bold text-white mb-1 text-center">
               {value}
             </div>
-            <div className="text-sm text-primary-200">{title}</div>
+            <div className="text-sm text-primary-200 text-center">{title}</div>
             <Button
               onClick={() => setIsEditing(true)}
               size="sm"

@@ -1,4 +1,3 @@
-
 import { useLocalStorage } from './useLocalStorage';
 
 export interface Achievement {
@@ -171,6 +170,11 @@ export const useUserData = () => {
         };
       });
 
+      // Calculate derived values from steps
+      const calculatedTime = `${Math.floor(steps / 120)}h ${Math.floor((steps % 120) / 2)}m`;
+      const calculatedCalories = Math.round(steps * 0.04);
+      const calculatedDistance = +(steps * 0.0008).toFixed(2);
+
       return {
         ...prev,
         steps,
@@ -181,13 +185,31 @@ export const useUserData = () => {
           [date]: {
             ...prev.dailyData[date],
             steps,
-            calories: Math.round(steps * 0.04),
-            distance: +(steps * 0.0008).toFixed(2),
-            time: `${Math.floor(steps / 120)}h ${Math.floor((steps % 120) / 2)}m`
+            calories: prev.dailyData[date]?.calories || calculatedCalories,
+            distance: prev.dailyData[date]?.distance || calculatedDistance,
+            time: prev.dailyData[date]?.time || calculatedTime,
+            tasks: prev.dailyData[date]?.tasks || [],
+            xpEarned: prev.dailyData[date]?.xpEarned || 0
           }
         }
       };
     });
+  };
+
+  const updateDayData = (date: string, field: 'time' | 'calories' | 'distance', value: string | number) => {
+    setUserData(prev => ({
+      ...prev,
+      dailyData: {
+        ...prev.dailyData,
+        [date]: {
+          ...prev.dailyData[date],
+          steps: prev.dailyData[date]?.steps || prev.steps,
+          tasks: prev.dailyData[date]?.tasks || [],
+          xpEarned: prev.dailyData[date]?.xpEarned || 0,
+          [field]: value
+        }
+      }
+    }));
   };
 
   const completeTask = (taskId: string) => {
@@ -228,6 +250,7 @@ export const useUserData = () => {
   return {
     userData,
     updateSteps,
+    updateDayData,
     completeTask,
     getRecentActivity,
     setUserData

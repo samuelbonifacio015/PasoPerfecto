@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Home, Calendar as CalendarIcon, User, Target, Plus, Activity, RotateCcw, Undo, Save } from 'lucide-react';
+import { Home, Calendar as CalendarIcon, User, Target, Plus, Activity, RotateCcw, Undo, Save, Clock, Zap, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserData } from '@/hooks/useUserData';
 import { useStepReset } from '@/hooks/useStepReset';
@@ -11,9 +12,9 @@ import ExerciseGrid from '@/components/ExerciseGrid';
 import EditableStatCard from '@/components/EditableStatCard';
 
 const Index = () => {
-  const { userData, updateSteps } = useUserData();
+  const { userData, updateSteps, updateDayData } = useUserData();
   const { saveCurrentSteps, resetSteps, undoReset, canUndo } = useStepReset();
-  const { saveProgress, updateTimeCaloriesDistance, getProgressForDate } = useDailyProgress();
+  const { saveProgress, updateTimeCaloriesDistance, getProgressForDate, markAsSaved } = useDailyProgress();
   const [customSteps, setCustomSteps] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [motivationalMessage, setMotivationalMessage] = useState('');
@@ -31,26 +32,36 @@ const Index = () => {
     "¡Eres imparable!"
   ];
 
-  // Obtiene la data del día actual o calcula valores predeterminados
-  const currentTime = userData.dailyData[currentDate]?.time || `${Math.floor(userData.steps / 120)}h ${Math.floor((userData.steps % 120) / 2)}m`;
-  const currentCalories = userData.dailyData[currentDate]?.calories || Math.round(userData.steps * 0.04);
-  const currentDistance = userData.dailyData[currentDate]?.distance || +(userData.steps * 0.0008).toFixed(2);
+  // Get current day's data with fallbacks
+  const currentDayData = userData.dailyData[currentDate];
+  const savedProgress = getProgressForDate(currentDate);
+  
+  const currentTime = currentDayData?.time || savedProgress?.time || `${Math.floor(userData.steps / 120)}h ${Math.floor((userData.steps % 120) / 2)}m`;
+  const currentCalories = currentDayData?.calories || savedProgress?.calories || Math.round(userData.steps * 0.04);
+  const currentDistance = currentDayData?.distance || savedProgress?.distance || +(userData.steps * 0.0008).toFixed(2);
+
+  const quickStepOptions = [500, 1000, 2000, 3000, 5000];
 
   const handleAddSteps = (steps: number) => {
     const newSteps = userData.steps + steps;
     updateSteps(newSteps, currentDate);
     
-    // Muestra mensaje aleatorio motivacional
+    // Show motivational message
     const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
     setMotivationalMessage(randomMessage);
     setTimeout(() => setMotivationalMessage(''), 3000);
   };
 
-  const handleCustomSteps = () => {
+  const handleSetCustomSteps = () => {
     if (customSteps && !isNaN(Number(customSteps))) {
-      handleAddSteps(Number(customSteps));
+      const steps = Number(customSteps);
+      updateSteps(steps, currentDate);
       setCustomSteps('');
       setShowCustomInput(false);
+      
+      const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+      setMotivationalMessage(randomMessage);
+      setTimeout(() => setMotivationalMessage(''), 3000);
     }
   };
 
@@ -66,14 +77,18 @@ const Index = () => {
   };
 
   const handleSaveProgress = () => {
-    saveProgress(currentDate, userData.steps, currentTime, currentCalories, currentDistance);
+    // Save to both systems for better synchronization
+    saveProgress(currentDate, userData.steps, currentTime.toString(), Number(currentCalories), Number(currentDistance));
+    markAsSaved(currentDate);
+    
     setMotivationalMessage('¡Progreso guardado correctamente!');
     setTimeout(() => setMotivationalMessage(''), 3000);
   };
 
   const handleUpdateStat = (field: 'time' | 'calories' | 'distance', value: string) => {
+    // Update both systems automatically
     updateTimeCaloriesDistance(currentDate, field, field === 'calories' || field === 'distance' ? Number(value) : value);
-    updateSteps(userData.steps, currentDate); // Trigger update to sync with userData
+    updateDayData(currentDate, field, field === 'calories' || field === 'distance' ? Number(value) : value);
   };
 
   return (
@@ -92,12 +107,12 @@ const Index = () => {
         )}
       </div>
 
-      {/* Widget Mision Diaria */}
+      {/* Daily Mission Widget */}
       <div className="px-4 mb-6">
         <DailyMissionWidget currentSteps={userData.steps} />
       </div>
 
-      {/* Progreso */}
+      {/* Progress Circle */}
       <div className="flex justify-center mb-8 animate-fade-in-up">
         <div className="relative">
           <svg className="transform -rotate-90" width="280" height="280">
@@ -150,56 +165,73 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Buttons Acciones */}
+      {/* Quick Action Buttons - Improved */}
       <div className="px-4 mb-6 animate-fade-in-up">
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <Button 
-            onClick={() => handleAddSteps(1000)}
-            className="bg-primary-600/80 hover:bg-primary-500 border border-primary-400/30 h-12 font-semibold text-lg backdrop-blur-sm button-hover"
-          >
-            +1000
-          </Button>
-          <Button 
-            onClick={() => handleAddSteps(3000)}
-            className="bg-primary-600/80 hover:bg-primary-500 border border-primary-400/30 h-12 font-semibold text-lg backdrop-blur-sm button-hover"
-          >
-            +3000
-          </Button>
-          <Button 
-            onClick={() => handleAddSteps(6000)}
-            className="bg-primary-600/80 hover:bg-primary-500 border border-primary-400/30 h-12 font-semibold text-lg backdrop-blur-sm button-hover"
-          >
-            +6000
-          </Button>
+        <div className="grid grid-cols-5 gap-2 mb-4">
+          {quickStepOptions.map((steps) => (
+            <Button 
+              key={steps}
+              onClick={() => handleAddSteps(steps)}
+              className="bg-primary-600/80 hover:bg-primary-500 border border-primary-400/30 h-12 font-semibold text-sm backdrop-blur-sm button-hover"
+            >
+              +{steps >= 1000 ? `${steps/1000}k` : steps}
+            </Button>
+          ))}
         </div>
 
         {!showCustomInput ? (
-          <Button 
-            onClick={() => setShowCustomInput(true)}
-            className="w-full bg-gradient-purple hover:bg-primary-500 h-12 flex items-center gap-2 text-lg font-semibold border border-primary-400/30 shadow-lg button-hover"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Personalizar Pasos</span>
-          </Button>
-        ) : (
-          <div className="flex gap-2">
-            <input
-              type="number"
-              value={customSteps}
-              onChange={(e) => setCustomSteps(e.target.value)}
-              placeholder="Ingresa pasos"
-              className="flex-1 px-4 py-3 bg-primary-700/50 border border-primary-500/30 rounded-lg text-white placeholder-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-400 transition-all duration-200"
-            />
+          <div className="grid grid-cols-2 gap-3">
             <Button 
-              onClick={handleCustomSteps}
-              className="bg-primary-500 hover:bg-primary-600 px-6 button-hover"
+              onClick={() => setShowCustomInput(true)}
+              className="bg-gradient-purple hover:bg-primary-500 h-12 flex items-center gap-2 text-lg font-semibold border border-primary-400/30 shadow-lg button-hover"
             >
-              Agregar
+              <Plus className="w-5 h-5" />
+              <span>Personalizar</span>
+            </Button>
+            <Button 
+              onClick={() => {
+                const steps = prompt('Ingresa el número total de pasos:');
+                if (steps && !isNaN(Number(steps))) {
+                  updateSteps(Number(steps), currentDate);
+                  const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+                  setMotivationalMessage(randomMessage);
+                  setTimeout(() => setMotivationalMessage(''), 3000);
+                }
+              }}
+              className="bg-blue-600 hover:bg-blue-700 h-12 flex items-center gap-2 text-lg font-semibold border border-blue-500/30 shadow-lg button-hover"
+            >
+              <Target className="w-5 h-5" />
+              <span>Establecer</span>
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <input
+                type="number"
+                value={customSteps}
+                onChange={(e) => setCustomSteps(e.target.value)}
+                placeholder="Ingresa pasos"
+                className="flex-1 px-4 py-3 bg-primary-700/50 border border-primary-500/30 rounded-lg text-white placeholder-primary-300 focus:outline-none focus:ring-2 focus:ring-primary-400 transition-all duration-200"
+              />
+              <Button 
+                onClick={handleSetCustomSteps}
+                className="bg-primary-500 hover:bg-primary-600 px-6 button-hover"
+              >
+                Establecer
+              </Button>
+            </div>
+            <Button 
+              onClick={() => setShowCustomInput(false)}
+              variant="outline"
+              className="w-full border-primary-500/50 text-primary-300 hover:bg-primary-500/20"
+            >
+              Cancelar
             </Button>
           </div>
         )}
 
-        {/* Guardar Progreso */}
+        {/* Save Progress Button */}
         <Button 
           onClick={handleSaveProgress}
           className="w-full mt-4 bg-green-600 hover:bg-green-700 h-12 flex items-center gap-2 text-lg font-semibold border border-green-500/30 shadow-lg button-hover"
@@ -208,7 +240,7 @@ const Index = () => {
           <span>Guardar Progreso del Día</span>
         </Button>
 
-        {/* Reset */}
+        {/* Reset and Undo Buttons */}
         <div className="grid grid-cols-2 gap-3 mt-4">
           <Button 
             onClick={handleResetSteps}
@@ -230,39 +262,42 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Cards with Exercise Grid - Auto-sync enabled */}
       <div className="px-4 mb-6 animate-fade-in-up">
         <div className="grid grid-cols-3 gap-4 text-center mb-4">
           <EditableStatCard
             title="Tiempo"
             value={currentTime}
             onSave={(value) => handleUpdateStat('time', value)}
+            icon={<Clock className="w-6 h-6 text-primary-300" />}
           />
           <EditableStatCard
             title="Calorías"
             value={currentCalories}
             onSave={(value) => handleUpdateStat('calories', value)}
+            icon={<Zap className="w-6 h-6 text-primary-300" />}
           />
           <EditableStatCard
             title="Km"
             value={currentDistance}
             onSave={(value) => handleUpdateStat('distance', value)}
+            icon={<MapPin className="w-6 h-6 text-primary-300" />}
           />
         </div>
 
-        {/* Grid Ejercicio*/}
+        {/* Exercise Grid */}
         <Card className="glass-card border-primary-500/20">
           <CardContent className="p-4">
             <ExerciseGrid 
-              time={currentTime}
-              calories={currentCalories}
-              distance={currentDistance}
+              time={currentTime.toString()}
+              calories={Number(currentCalories)}
+              distance={Number(currentDistance)}
             />
           </CardContent>
         </Card>
       </div>
 
-      {/* Estado de Meta */}
+      {/* Goal Status */}
       {isGoalCompleted && (
         <div className="mx-4 mb-6 animate-fade-in-up">
           <Card className="bg-green-500/20 border-green-500/40">
@@ -276,7 +311,7 @@ const Index = () => {
         </div>
       )}
 
-      {/* Display de Racha */}
+      {/* Streak Display */}
       <div className="mx-4 mb-20 animate-fade-in-up">
         <Card className="glass-card border-primary-500/20">
           <CardContent className="p-4">
@@ -288,7 +323,7 @@ const Index = () => {
         </Card>
       </div>
 
-      {/* Navegacion Inferior */}
+      {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-primary-800/95 backdrop-blur-md border-t border-primary-500/20">
         <div className="grid grid-cols-4 py-2">
           <Link to="/" className="flex flex-col items-center py-3 transition-all duration-200 hover:bg-primary-700/30">
