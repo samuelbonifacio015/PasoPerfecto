@@ -1,14 +1,18 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, Home, Calendar as CalendarIcon, User, CheckCircle, Plus, Clock, Zap, MapPin, Target, Activity } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, Calendar as CalendarIcon, User, CheckCircle, Plus, Clock, Zap, MapPin, Target, Activity, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserData } from '@/hooks/useUserData';
 import { useDailyProgress } from '@/hooks/useDailyProgress';
 import { usePlans } from '@/hooks/usePlans';
 import DailySummaryModal from '@/components/DailySummaryModal';
 import PlanModal from '@/components/PlanModal';
+import CalendarHeatmap from '@/components/CalendarHeatmap';
+import CalendarEvents from '@/components/CalendarEvents';
+import CalendarFilters from '@/components/CalendarFilters';
+import MonthSummary from '@/components/MonthSummary';
+import CalendarExport from '@/components/CalendarExport';
 
 const Calendar = () => {
   const { userData, updateSteps } = useUserData();
@@ -22,46 +26,11 @@ const Calendar = () => {
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [planType, setPlanType] = useState<'weekly' | 'monthly'>('weekly');
   const [editingPlan, setEditingPlan] = useState<any>(null);
+  const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('month');
+  const [hideInactiveDays, setHideInactiveDays] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   
   const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-  
-  const getDaysInMonth = (month: number, year: number) => {
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const daysInPrevMonth = new Date(year, month, 0).getDate();
-    
-    const days = [];
-    
-    // Días del mes anterior
-    for (let i = firstDay - 1; i >= 0; i--) {
-      days.push({
-        day: daysInPrevMonth - i,
-        isCurrentMonth: false,
-        date: `${year}-${String(month).padStart(2, '0')}-${String(daysInPrevMonth - i).padStart(2, '0')}`
-      });
-    }
-    
-    // Días del mes actual
-    for (let day = 1; day <= daysInMonth; day++) {
-      days.push({
-        day,
-        isCurrentMonth: true,
-        date: `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-      });
-    }
-    
-    // Días del mes siguiente para completar la grilla
-    const remainingDays = 42 - days.length;
-    for (let day = 1; day <= remainingDays; day++) {
-      days.push({
-        day,
-        isCurrentMonth: false,
-        date: `${year}-${String(month + 2).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-      });
-    }
-    
-    return days;
-  };
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     if (direction === 'prev') {
@@ -81,11 +50,9 @@ const Calendar = () => {
     }
   };
 
-  const handleDayClick = (dayInfo: any) => {
-    if (dayInfo.isCurrentMonth) {
-      setSelectedDate(dayInfo.date);
-      setShowSummaryModal(true);
-    }
+  const handleDayClick = (date: string) => {
+    setSelectedDate(date);
+    setShowSummaryModal(true);
   };
 
   const handleCreatePlan = (name: string, type: 'weekly' | 'monthly', startDate: string, targetSteps: number) => {
@@ -111,16 +78,6 @@ const Calendar = () => {
     exportPlan(plan);
   };
 
-  const daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-  const calendarDays = getDaysInMonth(currentMonth, currentYear);
-  
-  // Organizar días en semanas
-  const weeks = [];
-  for (let i = 0; i < calendarDays.length; i += 7) {
-    weeks.push(calendarDays.slice(i, i + 7));
-  }
-
-  // Fix the selectedDayData to handle the saved property safely
   const userDayData = userData.dailyData[selectedDate];
   const progressData = getProgressForDate(selectedDate);
   
@@ -142,7 +99,6 @@ const Calendar = () => {
   const isSaved = progressData?.saved || false;
   
   const isGoalCompleted = safeSteps >= userData.dailyGoal;
-  const today = new Date().toISOString().split('T')[0];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-800 via-primary-700 to-primary-600 text-white font-satoshi">
@@ -155,67 +111,49 @@ const Calendar = () => {
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <Button onClick={() => navigateMonth('prev')} variant="ghost" size="sm" className="text-white hover:bg-primary-600/50 button-hover">
+          <Button 
+            onClick={() => setShowFilters(!showFilters)} 
+            variant="ghost" 
+            size="sm" 
+            className="text-white hover:bg-primary-600/50"
+          >
+            <Settings className="w-5 h-5" />
+          </Button>
+          <Button onClick={() => navigateMonth('prev')} variant="ghost" size="sm" className="text-white hover:bg-primary-600/50">
             <ChevronLeft className="w-5 h-5" />
           </Button>
-          <Button onClick={() => navigateMonth('next')} variant="ghost" size="sm" className="text-white hover:bg-primary-600/50 button-hover">
+          <Button onClick={() => navigateMonth('next')} variant="ghost" size="sm" className="text-white hover:bg-primary-600/50">
             <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
       </div>
 
-      {/* Calendar */}
-      <Card className="mx-4 mt-4 glass-card border-primary-500/20 animate-fade-in-up">
-        <CardContent className="p-4">
-          {/* Days of week header */}
-          <div className="grid grid-cols-7 gap-2 mb-4">
-            {daysOfWeek.map((day) => (
-              <div key={day} className="text-center text-primary-200 font-medium py-2">
-                {day}
-              </div>
-            ))}
-          </div>
-          
-          {/* Calendar days */}
-          {weeks.map((week, weekIndex) => (
-            <div key={weekIndex} className="grid grid-cols-7 gap-2 mb-2">
-              {week.map((dayInfo, dayIndex) => {
-                const isToday = dayInfo.date === today;
-                const dayData = userData.dailyData[dayInfo.date] || getProgressForDate(dayInfo.date);
-                const hasData = dayData && (dayData.steps || 0) > 0;
-                const dayGoalMet = (dayData?.steps || 0) >= userData.dailyGoal;
-                const hasActivePlan = isDateInPlan(dayInfo.date);
-                
-                return (
-                  <div
-                    key={dayIndex}
-                    onClick={() => handleDayClick(dayInfo)}
-                    className={`text-center py-3 rounded-lg transition-all duration-200 cursor-pointer relative button-hover ${
-                      isToday 
-                        ? 'bg-primary-500 text-white font-bold shadow-lg border-2 border-primary-300' 
-                        : !dayInfo.isCurrentMonth 
-                        ? 'text-gray-600' 
-                        : selectedDate === dayInfo.date
-                        ? 'bg-primary-600/70 text-white border border-primary-400'
-                        : 'text-white hover:bg-primary-600/30'
-                    }`}
-                  >
-                    {dayInfo.day}
-                    {hasData && dayInfo.isCurrentMonth && (
-                      <div className={`absolute top-1 right-1 w-2 h-2 rounded-full ${
-                        dayGoalMet ? 'bg-green-400' : 'bg-yellow-400'
-                      }`}></div>
-                    )}
-                    {hasActivePlan && dayInfo.isCurrentMonth && (
-                      <div className="absolute bottom-1 left-1 w-2 h-2 rounded-full bg-blue-400"></div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      {/* Filters */}
+      {showFilters && (
+        <div className="mx-4 mb-4 animate-fade-in-up">
+          <CalendarFilters
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            hideInactiveDays={hideInactiveDays}
+            onToggleInactiveDays={() => setHideInactiveDays(!hideInactiveDays)}
+          />
+        </div>
+      )}
+
+      {/* Calendar Heatmap */}
+      <div className="mx-4 mt-4 animate-fade-in-up">
+        <CalendarHeatmap
+          currentMonth={currentMonth}
+          currentYear={currentYear}
+          onDayClick={handleDayClick}
+          selectedDate={selectedDate}
+        />
+      </div>
+
+      {/* Events for Selected Day */}
+      <div className="mx-4 mt-4 animate-fade-in-up">
+        <CalendarEvents selectedDate={selectedDate} />
+      </div>
 
       {/* Plan Creation Buttons */}
       <div className="mx-4 mt-4 grid grid-cols-2 gap-4 animate-fade-in-up">
@@ -235,8 +173,18 @@ const Calendar = () => {
         </Button>
       </div>
 
+      {/* Month Summary */}
+      <div className="mx-4 mt-4 animate-fade-in-up">
+        <MonthSummary month={currentMonth} year={currentYear} />
+      </div>
+
+      {/* Calendar Export */}
+      <div className="mx-4 mt-4 animate-fade-in-up">
+        <CalendarExport month={currentMonth} year={currentYear} />
+      </div>
+
       {/* Daily Summary */}
-      <Card className="mx-4 mt-6 glass-card border-primary-500/20 animate-fade-in-up">
+      <Card className="mx-4 mt-6 mb-20 glass-card border-primary-500/20 animate-fade-in-up">
         <CardContent className="p-4">
           <h3 className="text-lg font-semibold mb-4 text-white">Resumen Del Día ({selectedDate})</h3>
           
