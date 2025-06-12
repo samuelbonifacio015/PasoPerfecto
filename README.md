@@ -10,7 +10,9 @@
 <p align = "center"><i> PasoPerfecto es una aplicación web diseñada para ayudarte a llevar un seguimiento eficiente de tus pasos y actividad física diaria.
 </i></p>
 
-<img src="https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/banner.png" style="border-radius: 16px;" />
+<p align="center">
+  <img src="https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/banner.png" alt="Banner PasoPerfecto" width="100%" />
+</p>
 
 ## [https://paso-perfecto.vercel.app](https://paso-perfecto.vercel.app)
 
