@@ -35,7 +35,7 @@ const CalendarEvents: React.FC<CalendarEventsProps> = ({ selectedDate }) => {
     if (dayData.steps >= userData.dailyGoal) {
       events.push({
         id: `goal-${date}`,
-        title: '🎯 Meta Diaria Completada',
+        title: 'Meta Diaria Completada',
         time: '',
         type: 'achievement',
         steps: dayData.steps
