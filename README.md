@@ -4,13 +4,13 @@
 # PasoPerfecto
 
 <p align="center">
-  <img src="https://img.shields.io/badge/v1.0.0-blue" alt="v1.0.0" />
+  <img src="https://img.shields.io/badge/v1.1.0-blue" alt="v1.1.0" />
 </p>
 
 <p align = "center"><i> PasoPerfecto es una aplicación web diseñada para ayudarte a llevar un seguimiento eficiente de tus pasos y actividad física diaria.
 </i></p>
 
-<img src="https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/baner.png" style="border-radius: 16px;" />
+<img src="https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/banner.png" style="border-radius: 16px;" />
 
 ## [https://paso-perfecto.vercel.app](https://paso-perfecto.vercel.app)
 
