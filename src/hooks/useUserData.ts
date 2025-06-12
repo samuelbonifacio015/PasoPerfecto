@@ -38,6 +38,7 @@ export interface UserData {
       calories: number;
       distance: number;
       time: string;
+      note?: string;
     };
   };
 }
@@ -196,7 +197,42 @@ export const useUserData = () => {
     });
   };
 
-  const updateDayData = (date: string, field: 'time' | 'calories' | 'distance', value: string | number) => {
+  const updateDailyGoal = (newGoal: number) => {
+    setUserData(prev => ({
+      ...prev,
+      dailyGoal: newGoal
+    }));
+  };
+
+  const updateStreak = () => {
+    setUserData(prev => {
+      const today = new Date().toISOString().split('T')[0];
+      const lastActivityDate = Object.keys(prev.dailyData).sort().reverse()[0];
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayDateString = yesterday.toISOString().split('T')[0];
+  
+      const isYesterdayLastActivity = lastActivityDate === yesterdayDateString;
+      const isTodayAlreadyUpdated = Object.keys(prev.dailyData).includes(today);
+  
+      let newStreak = prev.streak;
+  
+      if (!isTodayAlreadyUpdated) {
+        if (isYesterdayLastActivity) {
+          newStreak += 1;
+        } else {
+          newStreak = 1;
+        }
+      }
+  
+      return {
+        ...prev,
+        streak: newStreak,
+      };
+    });
+  };
+
+  const updateDayData = (date: string, field: 'time' | 'calories' | 'distance' | 'note', value: string | number) => {
     setUserData(prev => ({
       ...prev,
       dailyData: {
@@ -206,6 +242,10 @@ export const useUserData = () => {
           steps: prev.dailyData[date]?.steps || prev.steps,
           tasks: prev.dailyData[date]?.tasks || [],
           xpEarned: prev.dailyData[date]?.xpEarned || 0,
+          calories: prev.dailyData[date]?.calories || Math.round(prev.steps * 0.04),
+          distance: prev.dailyData[date]?.distance || +(prev.steps * 0.0008).toFixed(2),
+          time: prev.dailyData[date]?.time || `${Math.floor(prev.steps / 120)}h ${Math.floor((prev.steps % 120) / 2)}m`,
+          note: prev.dailyData[date]?.note || '',
           [field]: value
         }
       }
@@ -250,6 +290,8 @@ export const useUserData = () => {
   return {
     userData,
     updateSteps,
+    updateDailyGoal,
+    updateStreak,
     updateDayData,
     completeTask,
     getRecentActivity,

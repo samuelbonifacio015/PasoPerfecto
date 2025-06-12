@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Home, Calendar as CalendarIcon, User, Target, Plus, Activity, RotateCcw, Undo, Save, Clock, Zap, MapPin } from 'lucide-react';
+import { Home, Calendar as CalendarIcon, User, Target, Plus, Activity, RotateCcw, Undo, Save, Clock, Zap, MapPin, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserData } from '@/hooks/useUserData';
 import { useStepReset } from '@/hooks/useStepReset';
@@ -10,14 +9,18 @@ import { useDailyProgress } from '@/hooks/useDailyProgress';
 import DailyMissionWidget from '@/components/DailyMissionWidget';
 import ExerciseGrid from '@/components/ExerciseGrid';
 import EditableStatCard from '@/components/EditableStatCard';
+import TimeInputModal from '@/components/TimeInputModal';
+import DailyNoteModal from '@/components/DailyNoteModal';
 
 const Index = () => {
-  const { userData, updateSteps, updateDayData } = useUserData();
+  const { userData, updateSteps, updateDayData, updateDailyGoal, updateStreak } = useUserData();
   const { saveCurrentSteps, resetSteps, undoReset, canUndo } = useStepReset();
   const { saveProgress, updateTimeCaloriesDistance, getProgressForDate, markAsSaved } = useDailyProgress();
   const [customSteps, setCustomSteps] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [motivationalMessage, setMotivationalMessage] = useState('');
+  const [isTimeModalOpen, setIsTimeModalOpen] = useState(false);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
 
   const progressPercentage = Math.min((userData.steps / userData.dailyGoal) * 100, 100);
   const isGoalCompleted = userData.steps >= userData.dailyGoal;
@@ -39,6 +42,8 @@ const Index = () => {
   const currentTime = currentDayData?.time || savedProgress?.time || `${Math.floor(userData.steps / 120)}h ${Math.floor((userData.steps % 120) / 2)}m`;
   const currentCalories = currentDayData?.calories || savedProgress?.calories || Math.round(userData.steps * 0.04);
   const currentDistance = currentDayData?.distance || savedProgress?.distance || +(userData.steps * 0.0008).toFixed(2);
+  
+  const currentNote = currentDayData?.note || '';
 
   const quickStepOptions = [500, 1000, 2000, 3000, 5000];
 
@@ -65,6 +70,15 @@ const Index = () => {
     }
   };
 
+  const handleSetGoal = () => {
+    const steps = prompt('Ingresa la nueva meta diaria de pasos:');
+    if (steps && !isNaN(Number(steps))) {
+      updateDailyGoal(Number(steps));
+      setMotivationalMessage('¡Nueva meta establecida!');
+      setTimeout(() => setMotivationalMessage(''), 3000);
+    }
+  };
+
   const handleResetSteps = () => {
     saveCurrentSteps(userData.steps);
     const newSteps = resetSteps();
@@ -81,6 +95,9 @@ const Index = () => {
     saveProgress(currentDate, userData.steps, currentTime.toString(), Number(currentCalories), Number(currentDistance));
     markAsSaved(currentDate);
     
+    // Update streak counter
+    updateStreak();
+    
     setMotivationalMessage('¡Progreso guardado correctamente!');
     setTimeout(() => setMotivationalMessage(''), 3000);
   };
@@ -89,6 +106,21 @@ const Index = () => {
     // Update both systems automatically
     updateTimeCaloriesDistance(currentDate, field, field === 'calories' || field === 'distance' ? Number(value) : value);
     updateDayData(currentDate, field, field === 'calories' || field === 'distance' ? Number(value) : value);
+  };
+
+  const handleUpdateNote = (note: string) => {
+    // Handle note separately since it's not part of the regular stats
+    updateTimeCaloriesDistance(currentDate, 'note', note);
+    updateDayData(currentDate, 'note', note);
+  };
+
+  const handleTimeModalSave = (hours: number, minutes: number) => {
+    const timeString = `${hours}h ${minutes}m`;
+    handleUpdateStat('time', timeString);
+  };
+
+  const handleNoteSave = (note: string) => {
+    handleUpdateNote(note);
   };
 
   return (
@@ -189,15 +221,7 @@ const Index = () => {
               <span>Personalizar</span>
             </Button>
             <Button 
-              onClick={() => {
-                const steps = prompt('Ingresa el número total de pasos:');
-                if (steps && !isNaN(Number(steps))) {
-                  updateSteps(Number(steps), currentDate);
-                  const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
-                  setMotivationalMessage(randomMessage);
-                  setTimeout(() => setMotivationalMessage(''), 3000);
-                }
-              }}
+              onClick={handleSetGoal}
               className="bg-blue-600 hover:bg-blue-700 h-12 flex items-center gap-2 text-lg font-semibold border border-blue-500/30 shadow-lg button-hover"
             >
               <Target className="w-5 h-5" />
@@ -265,12 +289,14 @@ const Index = () => {
       {/* Stats Cards with Exercise Grid - Auto-sync enabled */}
       <div className="px-4 mb-6 animate-fade-in-up">
         <div className="grid grid-cols-3 gap-4 text-center mb-4">
-          <EditableStatCard
-            title="Tiempo"
-            value={currentTime}
-            onSave={(value) => handleUpdateStat('time', value)}
-            icon={<Clock className="w-6 h-6 text-primary-300" />}
-          />
+          <div onClick={() => setIsTimeModalOpen(true)} className="cursor-pointer">
+            <EditableStatCard
+              title="Tiempo"
+              value={currentTime}
+              onSave={(value) => handleUpdateStat('time', value)}
+              icon={<Clock className="w-6 h-6 text-primary-300" />}
+            />
+          </div>
           <EditableStatCard
             title="Calorías"
             value={currentCalories}
@@ -286,13 +312,41 @@ const Index = () => {
         </div>
 
         {/* Exercise Grid */}
-        <Card className="glass-card border-primary-500/20">
+        <Card className="glass-card border-primary-500/20 mb-4">
           <CardContent className="p-4">
             <ExerciseGrid 
               time={currentTime.toString()}
               calories={Number(currentCalories)}
               distance={Number(currentDistance)}
             />
+          </CardContent>
+        </Card>
+
+        {/* Daily Note Section */}
+        <Card className="glass-card border-primary-500/20">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 text-primary-300" />
+                <span className="text-sm text-primary-200 font-medium">Nota del Día</span>
+              </div>
+              <Button
+                onClick={() => setIsNoteModalOpen(true)}
+                size="sm"
+                className="bg-primary-600 hover:bg-primary-700 text-xs"
+              >
+                {currentNote ? 'Editar' : 'Agregar'}
+              </Button>
+            </div>
+            {currentNote ? (
+              <div className="text-sm text-white bg-primary-700/20 p-3 rounded-lg">
+                {currentNote}
+              </div>
+            ) : (
+              <div className="text-sm text-primary-300 italic">
+                No hay nota para este día
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -322,6 +376,23 @@ const Index = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Time Input Modal */}
+      <TimeInputModal
+        isOpen={isTimeModalOpen}
+        onClose={() => setIsTimeModalOpen(false)}
+        onSave={handleTimeModalSave}
+        currentTime={currentTime.toString()}
+      />
+
+      {/* Daily Note Modal */}
+      <DailyNoteModal
+        isOpen={isNoteModalOpen}
+        onClose={() => setIsNoteModalOpen(false)}
+        onSave={handleNoteSave}
+        currentNote={currentNote}
+        selectedDate={currentDate}
+      />
 
       {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-primary-800/95 backdrop-blur-md border-t border-primary-500/20">

@@ -6,6 +6,7 @@ export interface DailyProgress {
   time: string;
   calories: number;
   distance: number;
+  note?: string;
   saved: boolean;
 }
 
@@ -20,12 +21,13 @@ export const useDailyProgress = () => {
         time,
         calories,
         distance,
+        note: prev[date]?.note || '',
         saved: true
       }
     }));
   };
   
-  const updateTimeCaloriesDistance = (date: string, field: 'time' | 'calories' | 'distance', value: string | number) => {
+  const updateTimeCaloriesDistance = (date: string, field: 'time' | 'calories' | 'distance' | 'note', value: string | number) => {
     setDailyProgress(prev => ({
       ...prev,
       [date]: {
@@ -34,6 +36,7 @@ export const useDailyProgress = () => {
         time: prev[date]?.time || '0h 0m',
         calories: prev[date]?.calories || 0,
         distance: prev[date]?.distance || 0,
+        note: prev[date]?.note || '',
         saved: prev[date]?.saved || false,
         [field]: value
       }

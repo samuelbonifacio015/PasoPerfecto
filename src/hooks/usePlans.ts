@@ -8,13 +8,14 @@ export interface Plan {
   startDate: string;
   endDate: string;
   targetSteps: number;
+  goalType: 'daily' | 'weekly' | 'monthly';
   created: string;
 }
 
 export const usePlans = () => {
   const [plans, setPlans] = useLocalStorage<Plan[]>('pasoperfecto-plans', []);
 
-  const createPlan = (name: string, type: 'weekly' | 'monthly', startDate: string, targetSteps: number) => {
+  const createPlan = (name: string, type: 'weekly' | 'monthly', startDate: string, targetSteps: number, goalType: string) => {
     const endDate = type === 'weekly' 
       ? new Date(new Date(startDate).getTime() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
       : new Date(new Date(startDate).getFullYear(), new Date(startDate).getMonth() + 1, 0).toISOString().split('T')[0];
@@ -26,6 +27,7 @@ export const usePlans = () => {
       startDate,
       endDate,
       targetSteps,
+      goalType: goalType as 'daily' | 'weekly' | 'monthly',
       created: new Date().toISOString().split('T')[0]
     };
 

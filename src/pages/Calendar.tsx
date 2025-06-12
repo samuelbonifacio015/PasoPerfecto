@@ -55,8 +55,8 @@ const Calendar = () => {
     setShowSummaryModal(true);
   };
 
-  const handleCreatePlan = (name: string, type: 'weekly' | 'monthly', startDate: string, targetSteps: number) => {
-    createPlan(name, type, startDate, targetSteps);
+  const handleCreatePlan = (name: string, type: 'weekly' | 'monthly', startDate: string, targetSteps: number, goalType: string) => {
+    createPlan(name, type, startDate, targetSteps, goalType);
   };
 
   const handleEditPlan = (plan: any) => {
