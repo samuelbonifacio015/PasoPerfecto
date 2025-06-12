@@ -4,7 +4,7 @@
 # PasoPerfecto
 
 <p align="center">
-  <img src="https://img.shields.io/badge/v1.1.0-blue" alt="v1.1.0" />
+  <img src="https://img.shields.io/badge/v1.1-blue" alt="v1.1" />
 </p>
 
 <p align = "center"><i> PasoPerfecto es una aplicación web diseñada para ayudarte a llevar un seguimiento eficiente de tus pasos y actividad física diaria.
@@ -49,14 +49,23 @@
 
 ## 📸 Screenshots
 
+#### Home
+![Home](https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/home.png)
+![Home](https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/home-2.png)
+
 #### Actividades
 ![Actividades](https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/activities.png)
+![Actividades](https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/activities-2.png)
 
 #### Calendario
 ![Calendario](https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/calendar.png)
+![Calendario](https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/calendar-2.png)
 
-#### Home
-![Home](https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/home.png)
+#### Perfil
+![Perfil](https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/profile-1.png)
+![Perfil](https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/profile-2.png)
+![Perfil](https://github.com/samuelbonifacio015/PasoPerfecto/raw/main/screenshots/profile-3.png)
+
 
 ## Instalación local
 
@@ -78,27 +87,32 @@ Sigue estos pasos para ejecutar PasoPerfecto en tu entorno local:
   npm run dev
   ```
 
-4. Abre tu navegador y visita [http://localhost:5173](http://localhost:5173) para ver la aplicación en funcionamiento.
+4. Abre tu navegador y visita [http://localhost:'direccion'](http://localhost:'dirrecion') para ver la aplicación en funcionamiento.
 
 > Asegúrate de tener [Node.js](https://nodejs.org/) instalado en tu sistema.
 
 ## 🚀 Release
 
-### <img src="https://img.shields.io/badge/v1.0.0-blue" alt="v1.0.0" height="20" /> Versión 1.0.0
+### <img src="https://img.shields.io/badge/v1.1-blue" alt="v1.1" height="20" /> Versión 1.1
 
-> **Fecha de lanzamiento:** 6/06/25
+> **Fecha de lanzamiento:** 11/06/25
 
-#### ✨ Novedades principales
+#### ✨ Funciones Principales
 
 - 🏃‍♂️ **Registro de pasos:** Manual y automático.
 - 📊 **Estadísticas avanzadas:** Gráficos y resúmenes diarios, semanales y mensuales.
 - 🎯 **Objetivos personalizados:** Establecimiento y seguimiento de metas.
 - 📅 **Historial y calendario:** Consulta de actividades y logros.
-- 👥 **Soporte multiusuario:** Gestión de varias cuentas.
-- 🔔 **Notificaciones:** Recordatorios y alertas.
-- 🌙 **Modo oscuro:** Interfaz adaptable.
-- 🛡️ **Privacidad:** Protección de datos personales.
 - 💻 **Interfaz moderna y responsiva.**
+
+#### 🆕 Versión 1.1
+
+- 📝 Se pueden agregar notas para cada día.
+- 📆 Se pueden crear, editar, eliminar y exportar planes semanales y mensuales.
+- ⚙️ Personalización de objetivos: el usuario puede definir la cantidad de pasos, tiempo, etc. a través de un input.
+- 💡 Motivaciones diarias añadidas para mantener la inspiración.
+- 📈 Registro diario del progreso en la app.
+- 🔥 Se agregó una racha para los días seguidos de actividad.
 
 ---
 
@@ -108,3 +122,5 @@ Consulta el [changelog completo](https://github.com/samuelbonifacio015/PasoPerfe
 
 ¡Las contribuciones son bienvenidas! Por favor, abre un issue o pull request para sugerencias o mejoras.
 
+## Creditos
+Made with ❤️ by [samuelbonifacio015](https://github.com/samuelbonifacio015).
